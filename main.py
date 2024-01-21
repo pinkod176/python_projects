@@ -51,3 +51,4 @@ while run:
         print(x)
         time.sleep(0.6)
     ninja.defend(word = alien_attack)
+print()
