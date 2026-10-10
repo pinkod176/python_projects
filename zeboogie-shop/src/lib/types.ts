@@ -13,7 +13,7 @@ export type ProductImage = {
   height?: number;
 };
 
-export type ProductAvailability = "in_stock" | "unavailable";
+export type ProductAvailability = "in_stock" | "unavailable" | "unknown";
 
 export type ProductAttribute = { name: string; value: string };
 
@@ -99,4 +99,7 @@ export type SyncResult = {
 export type ProductCard = Pick<
   Product,
   "vkId" | "slug" | "title" | "price" | "oldPrice" | "availability"
-> & { image: string | null; imageWidth?: number; imageHeight?: number; categoryTitle?: string; description: string };
+> & { variant?: string; image: string | null; imageWidth?: number; imageHeight?: number; categoryTitle?: string; description: string };
+
+/** Ключ строки корзины: один товар с разными вариантами — разные строки. */
+export const lineKey = (c: Pick<ProductCard, "vkId" | "variant">) => (c.variant ? `${c.vkId}|${c.variant}` : c.vkId);

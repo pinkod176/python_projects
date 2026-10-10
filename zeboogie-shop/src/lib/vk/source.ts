@@ -18,7 +18,7 @@ const demoFile = z.object({
 const demoSource: CatalogSource = {
   kind: "demo",
   async fetch() {
-    const file = path.join(process.cwd(), "src/lib/vk/demo/market.json");
+    const file = path.join(/* turbopackIgnore: true */ process.cwd(), "src/lib/vk/demo/market.json");
     const data = demoFile.parse(JSON.parse(await readFile(file, "utf8")));
     return { ...data, albumMembership: new Map(), warnings: [] };
   },

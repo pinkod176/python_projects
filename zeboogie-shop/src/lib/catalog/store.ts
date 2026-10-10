@@ -9,7 +9,7 @@ import type { Catalog, SyncResult } from "@/lib/types";
  * поэтому тестовые товары никогда не смешиваются с настоящими.
  * Интерфейс узкий (load/save) — при необходимости заменяется на PostgreSQL/Prisma без изменения остального кода.
  */
-const dir = () => path.resolve(process.cwd(), getEnv().DATA_DIR);
+const dir = () => path.resolve(/* turbopackIgnore: true */ process.cwd(), getEnv().DATA_DIR);
 const fileFor = (source: "demo" | "vk") => path.join(dir(), `catalog.${source}.json`);
 
 let memo: { source: string; mtimeKey: string; value: Catalog } | null = null;

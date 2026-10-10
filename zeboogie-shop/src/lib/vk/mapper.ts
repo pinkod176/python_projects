@@ -89,8 +89,7 @@ export function mapItem(item: VkMarketItem, ctx: MapContext, previous?: Product)
   if (!categories.length && item.category?.name) {
     categories = [{ id: `c${item.category.id ?? item.category.name}`, title: item.category.name }];
   }
-  const available = item.availability === undefined || item.availability === 0;
-  return {
+    return {
     vkId,
     itemId: item.id,
     ownerId: item.owner_id,
@@ -103,7 +102,8 @@ export function mapItem(item: VkMarketItem, ctx: MapContext, previous?: Product)
     categories,
     attributes: mapAttributes(item),
     options: mapOptions(item),
-    availability: available ? "in_stock" : "unavailable",
+    // Наличие показываем только если VK его передал.
+    availability: item.availability === undefined ? "unknown" : item.availability === 0 ? "in_stock" : "unavailable",
     vkUrl: `https://${ctx.domain}/market${item.owner_id}?w=product${item.owner_id}_${item.id}`,
     publishedAt: item.date ?? 0,
     status: "active",
