@@ -1,0 +1,1179 @@
+{
+ "_comment": "ДЕМО-ДАННЫЕ в формате ответов VK API. Не являются товарами реального сообщества.",
+ "group": {
+  "id": 100000001,
+  "name": "demo",
+  "screen_name": "zeboogie",
+  "market": {
+   "enabled": 1
+  }
+ },
+ "albums": [
+  {
+   "id": 1,
+   "owner_id": -100000001,
+   "title": "Вазы и кашпо",
+   "count": 5
+  },
+  {
+   "id": 2,
+   "owner_id": -100000001,
+   "title": "Посуда",
+   "count": 6
+  },
+  {
+   "id": 3,
+   "owner_id": -100000001,
+   "title": "Свет",
+   "count": 3
+  },
+  {
+   "id": 4,
+   "owner_id": -100000001,
+   "title": "Интерьер",
+   "count": 2
+  }
+ ],
+ "items": [
+  {
+   "id": 1001,
+   "owner_id": -100000001,
+   "title": "Ваза «Дюна»",
+   "description": "Тестовые данные. Высокая ваза с матовой глазурью цвета песка. Подходит для сухоцветов.",
+   "price": {
+    "amount": "480000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "4800 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/vase?c=D9C3A5&v=1",
+   "date": 1759000000,
+   "availability": 0,
+   "albums_ids": [
+    1
+   ],
+   "photos": [
+    {
+     "id": 10011,
+     "sizes": [
+      {
+       "url": "/demo-art/vase?c=D9C3A5&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10012,
+     "sizes": [
+      {
+       "url": "/demo-art/vase?c=D9C3A5&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10013,
+     "sizes": [
+      {
+       "url": "/demo-art/vase?c=D9C3A5&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "керамика"
+    },
+    {
+     "variant_id": 2,
+     "property_name": "Покрытие",
+     "value_name": "матовая глазурь"
+    }
+   ]
+  },
+  {
+   "id": 1002,
+   "owner_id": -100000001,
+   "title": "Ваза «Тень»",
+   "description": "Тестовые данные. Графитовая ваза строгой формы для одной ветки или пучка трав.",
+   "price": {
+    "amount": "560000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "5600 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/vase?c=3B3A38&v=1",
+   "date": 1759259200,
+   "availability": 0,
+   "albums_ids": [
+    1
+   ],
+   "photos": [
+    {
+     "id": 10021,
+     "sizes": [
+      {
+       "url": "/demo-art/vase?c=3B3A38&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10022,
+     "sizes": [
+      {
+       "url": "/demo-art/vase?c=3B3A38&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10023,
+     "sizes": [
+      {
+       "url": "/demo-art/vase?c=3B3A38&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "керамика"
+    }
+   ]
+  },
+  {
+   "id": 1003,
+   "owner_id": -100000001,
+   "title": "Кашпо «Глина»",
+   "description": "Тестовые данные. Кашпо из обожжённой глины тёплого терракотового оттенка.",
+   "price": {
+    "amount": "290000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "2900 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/planter?c=B4684A&v=1",
+   "date": 1759518400,
+   "availability": 0,
+   "albums_ids": [
+    1
+   ],
+   "photos": [
+    {
+     "id": 10031,
+     "sizes": [
+      {
+       "url": "/demo-art/planter?c=B4684A&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10032,
+     "sizes": [
+      {
+       "url": "/demo-art/planter?c=B4684A&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10033,
+     "sizes": [
+      {
+       "url": "/demo-art/planter?c=B4684A&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "глина"
+    }
+   ]
+  },
+  {
+   "id": 1004,
+   "owner_id": -100000001,
+   "title": "Кувшин «Утро»",
+   "description": "Тестовые данные. Кувшин шалфейного цвета с широким горлом.",
+   "price": {
+    "amount": "390000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "3900 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/jug?c=A8B5A0&v=1",
+   "date": 1759777600,
+   "availability": 0,
+   "albums_ids": [
+    1
+   ],
+   "photos": [
+    {
+     "id": 10041,
+     "sizes": [
+      {
+       "url": "/demo-art/jug?c=A8B5A0&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10042,
+     "sizes": [
+      {
+       "url": "/demo-art/jug?c=A8B5A0&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10043,
+     "sizes": [
+      {
+       "url": "/demo-art/jug?c=A8B5A0&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "керамика"
+    }
+   ]
+  },
+  {
+   "id": 1005,
+   "owner_id": -100000001,
+   "title": "Кружка «Пепел»",
+   "description": "Тестовые данные. Кружка с толстыми стенками и удобной ручкой.",
+   "price": {
+    "amount": "140000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "1400 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/mug?c=8E8B85&v=1",
+   "date": 1760036800,
+   "availability": 0,
+   "albums_ids": [
+    2
+   ],
+   "photos": [
+    {
+     "id": 10051,
+     "sizes": [
+      {
+       "url": "/demo-art/mug?c=8E8B85&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10052,
+     "sizes": [
+      {
+       "url": "/demo-art/mug?c=8E8B85&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10053,
+     "sizes": [
+      {
+       "url": "/demo-art/mug?c=8E8B85&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "керамика"
+    }
+   ]
+  },
+  {
+   "id": 1006,
+   "owner_id": -100000001,
+   "title": "Кружка «Охра»",
+   "description": "Тестовые данные. Кружка тёплого охристого цвета.",
+   "price": {
+    "amount": "140000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "1400 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/mug?c=C98F3B&v=1",
+   "date": 1760296000,
+   "availability": 0,
+   "albums_ids": [
+    2
+   ],
+   "photos": [
+    {
+     "id": 10061,
+     "sizes": [
+      {
+       "url": "/demo-art/mug?c=C98F3B&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10062,
+     "sizes": [
+      {
+       "url": "/demo-art/mug?c=C98F3B&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10063,
+     "sizes": [
+      {
+       "url": "/demo-art/mug?c=C98F3B&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "керамика"
+    }
+   ]
+  },
+  {
+   "id": 1007,
+   "owner_id": -100000001,
+   "title": "Тарелка «Луна»",
+   "description": "Тестовые данные. Плоская тарелка молочного цвета с узким бортом.",
+   "price": {
+    "amount": "180000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "1800 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/plate?c=EDE6DA&v=1",
+   "date": 1760555200,
+   "availability": 0,
+   "albums_ids": [
+    2
+   ],
+   "photos": [
+    {
+     "id": 10071,
+     "sizes": [
+      {
+       "url": "/demo-art/plate?c=EDE6DA&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10072,
+     "sizes": [
+      {
+       "url": "/demo-art/plate?c=EDE6DA&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10073,
+     "sizes": [
+      {
+       "url": "/demo-art/plate?c=EDE6DA&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "керамика"
+    }
+   ]
+  },
+  {
+   "id": 1008,
+   "owner_id": -100000001,
+   "title": "Набор тарелок «Луна», 4 шт.",
+   "description": "Тестовые данные. Четыре тарелки из серии «Луна».",
+   "price": {
+    "amount": "640000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "6400 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/plate?c=E4DCCD&v=1",
+   "date": 1760814400,
+   "availability": 0,
+   "albums_ids": [
+    2
+   ],
+   "photos": [
+    {
+     "id": 10081,
+     "sizes": [
+      {
+       "url": "/demo-art/plate?c=E4DCCD&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10082,
+     "sizes": [
+      {
+       "url": "/demo-art/plate?c=E4DCCD&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10083,
+     "sizes": [
+      {
+       "url": "/demo-art/plate?c=E4DCCD&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "керамика"
+    },
+    {
+     "variant_id": 2,
+     "property_name": "В наборе",
+     "value_name": "4 шт."
+    }
+   ]
+  },
+  {
+   "id": 1009,
+   "owner_id": -100000001,
+   "title": "Миска «Волна»",
+   "description": "Тестовые данные. Глубокая миска с волнистым краем.",
+   "price": {
+    "amount": "210000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "2100 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/bowl?c=CBB79A&v=1",
+   "date": 1761073600,
+   "availability": 0,
+   "albums_ids": [
+    2
+   ],
+   "photos": [
+    {
+     "id": 10091,
+     "sizes": [
+      {
+       "url": "/demo-art/bowl?c=CBB79A&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10092,
+     "sizes": [
+      {
+       "url": "/demo-art/bowl?c=CBB79A&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10093,
+     "sizes": [
+      {
+       "url": "/demo-art/bowl?c=CBB79A&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "керамика"
+    }
+   ]
+  },
+  {
+   "id": 1010,
+   "owner_id": -100000001,
+   "title": "Миска «Мох»",
+   "description": "Тестовые данные. Миска зелёного оттенка. Временно недоступна — так проверяется состояние «нет в наличии».",
+   "price": {
+    "amount": "210000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "2100 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/bowl?c=7C8B6A&v=1",
+   "date": 1761332800,
+   "availability": 2,
+   "albums_ids": [
+    2
+   ],
+   "photos": [
+    {
+     "id": 10101,
+     "sizes": [
+      {
+       "url": "/demo-art/bowl?c=7C8B6A&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10102,
+     "sizes": [
+      {
+       "url": "/demo-art/bowl?c=7C8B6A&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10103,
+     "sizes": [
+      {
+       "url": "/demo-art/bowl?c=7C8B6A&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "керамика"
+    }
+   ]
+  },
+  {
+   "id": 1011,
+   "owner_id": -100000001,
+   "title": "Свеча «Камень»",
+   "description": "Тестовые данные. Свеча в форме гладкого камня.",
+   "price": {
+    "amount": "160000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "1600 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/candle?c=E6DCCB&v=1",
+   "date": 1761592000,
+   "availability": 0,
+   "albums_ids": [
+    3
+   ],
+   "photos": [
+    {
+     "id": 10111,
+     "sizes": [
+      {
+       "url": "/demo-art/candle?c=E6DCCB&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10112,
+     "sizes": [
+      {
+       "url": "/demo-art/candle?c=E6DCCB&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10113,
+     "sizes": [
+      {
+       "url": "/demo-art/candle?c=E6DCCB&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "воск"
+    }
+   ]
+  },
+  {
+   "id": 1012,
+   "owner_id": -100000001,
+   "title": "Подсвечник «Арка»",
+   "description": "Тестовые данные. Тёмный подсвечник в форме арки.",
+   "price": {
+    "amount": "230000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "2300 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/candle?c=2E2D2B&v=1",
+   "date": 1761851200,
+   "availability": 0,
+   "albums_ids": [
+    3
+   ],
+   "photos": [
+    {
+     "id": 10121,
+     "sizes": [
+      {
+       "url": "/demo-art/candle?c=2E2D2B&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10122,
+     "sizes": [
+      {
+       "url": "/demo-art/candle?c=2E2D2B&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10123,
+     "sizes": [
+      {
+       "url": "/demo-art/candle?c=2E2D2B&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "металл"
+    }
+   ]
+  },
+  {
+   "id": 1013,
+   "owner_id": -100000001,
+   "title": "Свеча «Смола»",
+   "description": "Тестовые данные. Свеча глубокого коричневого цвета.",
+   "price": {
+    "amount": "170000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "1700 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/candle?c=5A3E2B&v=1",
+   "date": 1762110400,
+   "availability": 0,
+   "albums_ids": [
+    3
+   ],
+   "photos": [
+    {
+     "id": 10131,
+     "sizes": [
+      {
+       "url": "/demo-art/candle?c=5A3E2B&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10132,
+     "sizes": [
+      {
+       "url": "/demo-art/candle?c=5A3E2B&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10133,
+     "sizes": [
+      {
+       "url": "/demo-art/candle?c=5A3E2B&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "воск"
+    }
+   ]
+  },
+  {
+   "id": 1014,
+   "owner_id": -100000001,
+   "title": "Поднос «Горизонт»",
+   "description": "Тестовые данные. Прямоугольный поднос с низким бортом.",
+   "price": {
+    "amount": "320000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "3200 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/tray?c=BFA98A&v=1",
+   "date": 1762369600,
+   "availability": 0,
+   "albums_ids": [
+    4
+   ],
+   "photos": [
+    {
+     "id": 10141,
+     "sizes": [
+      {
+       "url": "/demo-art/tray?c=BFA98A&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10142,
+     "sizes": [
+      {
+       "url": "/demo-art/tray?c=BFA98A&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10143,
+     "sizes": [
+      {
+       "url": "/demo-art/tray?c=BFA98A&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "дерево"
+    }
+   ]
+  },
+  {
+   "id": 1015,
+   "owner_id": -100000001,
+   "title": "Поднос «Графит»",
+   "description": "Тестовые данные. Тёмный поднос для стола или полки.",
+   "price": {
+    "amount": "340000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "3400 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/tray?c=4A4947&v=1",
+   "date": 1762628800,
+   "availability": 0,
+   "albums_ids": [
+    4
+   ],
+   "photos": [
+    {
+     "id": 10151,
+     "sizes": [
+      {
+       "url": "/demo-art/tray?c=4A4947&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10152,
+     "sizes": [
+      {
+       "url": "/demo-art/tray?c=4A4947&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10153,
+     "sizes": [
+      {
+       "url": "/demo-art/tray?c=4A4947&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "дерево"
+    }
+   ]
+  },
+  {
+   "id": 1016,
+   "owner_id": -100000001,
+   "title": "Ваза «Облако»",
+   "description": "Тестовые данные. Округлая ваза; у товара есть варианты цвета (проверка выбора варианта).",
+   "price": {
+    "amount": "520000",
+    "currency": {
+     "id": 643,
+     "name": "RUB"
+    },
+    "text": "5200 руб."
+   },
+   "category": {
+    "id": 1,
+    "name": "Для дома и интерьера",
+    "section": {
+     "id": 1,
+     "name": "Дом"
+    }
+   },
+   "thumb_photo": "/demo-art/vase?c=EFEAE2&v=1",
+   "date": 1762888000,
+   "availability": 0,
+   "albums_ids": [
+    1
+   ],
+   "photos": [
+    {
+     "id": 10161,
+     "sizes": [
+      {
+       "url": "/demo-art/vase?c=EFEAE2&v=1",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10162,
+     "sizes": [
+      {
+       "url": "/demo-art/vase?c=EFEAE2&v=2",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 10163,
+     "sizes": [
+      {
+       "url": "/demo-art/vase?c=EFEAE2&v=3",
+       "width": 1200,
+       "height": 1500,
+       "type": "z"
+      }
+     ]
+    }
+   ],
+   "property_values": [
+    {
+     "variant_id": 1,
+     "property_name": "Материал",
+     "value_name": "керамика"
+    }
+   ],
+   "variants": [
+    {
+     "property_name": "Цвет",
+     "value": "Белый"
+    },
+    {
+     "property_name": "Цвет",
+     "value": "Серый"
+    }
+   ]
+  }
+ ]
+}
