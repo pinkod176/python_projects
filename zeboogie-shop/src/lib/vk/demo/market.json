@@ -1,5 +1,5 @@
 {
- "_comment": "ДЕМО-ДАННЫЕ в формате ответов VK API. Названия и цены сняты со скриншотов витрины сообщества; фото — временные вырезки из скриншотов (низкое разрешение). В режиме VK_MODE=live не используются.",
+ "_comment": "ДЕМО-ДАННЫЕ в формате ответов VK API. Названия и цены — из выгрузки каталога владельца (xlsx, 11.10.2026); подборки (albums) — условные. Фото: NN-tile.jpg — временные вырезки из скриншотов; если рядом лежат NN-1.jpg, NN-2.jpg… (фото владельца или скачанные скриптом `npm run demo:photos`), source.ts подставляет их вместо вырезки. В режиме live не используются.",
  "group": {
   "id": 100000001,
   "name": "demo",
@@ -47,7 +47,7 @@
     },
     "text": "3600 руб."
    },
-   "thumb_photo": "/demo/products/01.jpg",
+   "thumb_photo": "/demo/products/01-tile.jpg",
    "date": 1761419200,
    "albums_ids": [
     1
@@ -57,7 +57,7 @@
      "id": 20011,
      "sizes": [
       {
-       "url": "/demo/products/01.jpg",
+       "url": "/demo/products/01-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -78,7 +78,7 @@
     },
     "text": "4000 руб."
    },
-   "thumb_photo": "/demo/products/02.jpg",
+   "thumb_photo": "/demo/products/02-tile.jpg",
    "date": 1761332800,
    "albums_ids": [
     1
@@ -88,7 +88,7 @@
      "id": 20021,
      "sizes": [
       {
-       "url": "/demo/products/02.jpg",
+       "url": "/demo/products/02-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -109,7 +109,7 @@
     },
     "text": "1300 руб."
    },
-   "thumb_photo": "/demo/products/03.jpg",
+   "thumb_photo": "/demo/products/03-tile.jpg",
    "date": 1761246400,
    "albums_ids": [
     1
@@ -119,7 +119,7 @@
      "id": 20031,
      "sizes": [
       {
-       "url": "/demo/products/03.jpg",
+       "url": "/demo/products/03-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -140,7 +140,7 @@
     },
     "text": "1000 руб."
    },
-   "thumb_photo": "/demo/products/04.jpg",
+   "thumb_photo": "/demo/products/04-tile.jpg",
    "date": 1761160000,
    "albums_ids": [
     3
@@ -150,7 +150,7 @@
      "id": 20041,
      "sizes": [
       {
-       "url": "/demo/products/04.jpg",
+       "url": "/demo/products/04-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -171,7 +171,7 @@
     },
     "text": "1000 руб."
    },
-   "thumb_photo": "/demo/products/05.jpg",
+   "thumb_photo": "/demo/products/05-tile.jpg",
    "date": 1761073600,
    "albums_ids": [
     3
@@ -181,7 +181,7 @@
      "id": 20051,
      "sizes": [
       {
-       "url": "/demo/products/05.jpg",
+       "url": "/demo/products/05-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -202,7 +202,7 @@
     },
     "text": "1500 руб."
    },
-   "thumb_photo": "/demo/products/06.jpg",
+   "thumb_photo": "/demo/products/06-tile.jpg",
    "date": 1760987200,
    "albums_ids": [
     1
@@ -212,7 +212,7 @@
      "id": 20061,
      "sizes": [
       {
-       "url": "/demo/products/06.jpg",
+       "url": "/demo/products/06-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -233,7 +233,7 @@
     },
     "text": "2500 руб."
    },
-   "thumb_photo": "/demo/products/07.jpg",
+   "thumb_photo": "/demo/products/07-tile.jpg",
    "date": 1760900800,
    "albums_ids": [
     1
@@ -243,7 +243,7 @@
      "id": 20071,
      "sizes": [
       {
-       "url": "/demo/products/07.jpg",
+       "url": "/demo/products/07-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -255,7 +255,7 @@
   {
    "id": 2008,
    "owner_id": -100000001,
-   "title": "Скамеечка",
+   "title": "Скамеечка сервировочная",
    "price": {
     "amount": "450000",
     "currency": {
@@ -264,7 +264,7 @@
     },
     "text": "4500 руб."
    },
-   "thumb_photo": "/demo/products/08.jpg",
+   "thumb_photo": "/demo/products/08-tile.jpg",
    "date": 1760814400,
    "albums_ids": [
     4
@@ -274,7 +274,7 @@
      "id": 20081,
      "sizes": [
       {
-       "url": "/demo/products/08.jpg",
+       "url": "/demo/products/08-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -295,7 +295,7 @@
     },
     "text": "800 руб."
    },
-   "thumb_photo": "/demo/products/09.jpg",
+   "thumb_photo": "/demo/products/09-tile.jpg",
    "date": 1760728000,
    "albums_ids": [
     3
@@ -305,7 +305,7 @@
      "id": 20091,
      "sizes": [
       {
-       "url": "/demo/products/09.jpg",
+       "url": "/demo/products/09-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -326,7 +326,7 @@
     },
     "text": "600 руб."
    },
-   "thumb_photo": "/demo/products/10.jpg",
+   "thumb_photo": "/demo/products/10-tile.jpg",
    "date": 1760641600,
    "albums_ids": [
     4
@@ -336,7 +336,7 @@
      "id": 20101,
      "sizes": [
       {
-       "url": "/demo/products/10.jpg",
+       "url": "/demo/products/10-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -357,7 +357,7 @@
     },
     "text": "600 руб."
    },
-   "thumb_photo": "/demo/products/11.jpg",
+   "thumb_photo": "/demo/products/11-tile.jpg",
    "date": 1760555200,
    "albums_ids": [
     4
@@ -367,7 +367,7 @@
      "id": 20111,
      "sizes": [
       {
-       "url": "/demo/products/11.jpg",
+       "url": "/demo/products/11-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -379,7 +379,7 @@
   {
    "id": 2012,
    "owner_id": -100000001,
-   "title": "Рамка Оконный",
+   "title": "Рамка Оконный наличник",
    "price": {
     "amount": "450000",
     "currency": {
@@ -388,7 +388,7 @@
     },
     "text": "4500 руб."
    },
-   "thumb_photo": "/demo/products/12.jpg",
+   "thumb_photo": "/demo/products/12-tile.jpg",
    "date": 1760468800,
    "albums_ids": [
     2
@@ -398,7 +398,7 @@
      "id": 20121,
      "sizes": [
       {
-       "url": "/demo/products/12.jpg",
+       "url": "/demo/products/12-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -410,7 +410,7 @@
   {
    "id": 2013,
    "owner_id": -100000001,
-   "title": "Рамка S для",
+   "title": "Рамка S для объемных работ",
    "price": {
     "amount": "90000",
     "currency": {
@@ -419,7 +419,7 @@
     },
     "text": "900 руб."
    },
-   "thumb_photo": "/demo/products/13.jpg",
+   "thumb_photo": "/demo/products/13-tile.jpg",
    "date": 1760382400,
    "albums_ids": [
     1
@@ -429,7 +429,7 @@
      "id": 20131,
      "sizes": [
       {
-       "url": "/demo/products/13.jpg",
+       "url": "/demo/products/13-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -441,7 +441,7 @@
   {
    "id": 2014,
    "owner_id": -100000001,
-   "title": "Арт объект Золотое",
+   "title": "Арт объект Золотое Сечение",
    "price": {
     "amount": "2500000",
     "currency": {
@@ -450,7 +450,7 @@
     },
     "text": "25000 руб."
    },
-   "thumb_photo": "/demo/products/14.jpg",
+   "thumb_photo": "/demo/products/14-tile.jpg",
    "date": 1760296000,
    "albums_ids": [
     4
@@ -460,7 +460,7 @@
      "id": 20141,
      "sizes": [
       {
-       "url": "/demo/products/14.jpg",
+       "url": "/demo/products/14-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -481,7 +481,7 @@
     },
     "text": "88000 руб."
    },
-   "thumb_photo": "/demo/products/15.jpg",
+   "thumb_photo": "/demo/products/15-tile.jpg",
    "date": 1760209600,
    "albums_ids": [
     4
@@ -491,7 +491,7 @@
      "id": 20151,
      "sizes": [
       {
-       "url": "/demo/products/15.jpg",
+       "url": "/demo/products/15-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -503,7 +503,7 @@
   {
    "id": 2016,
    "owner_id": -100000001,
-   "title": "Рамка-полка широкая",
+   "title": "Рамка-полка широкая XXL",
    "price": {
     "amount": "150000",
     "currency": {
@@ -512,7 +512,7 @@
     },
     "text": "1500 руб."
    },
-   "thumb_photo": "/demo/products/16.jpg",
+   "thumb_photo": "/demo/products/16-tile.jpg",
    "date": 1760123200,
    "albums_ids": [
     2
@@ -522,7 +522,7 @@
      "id": 20161,
      "sizes": [
       {
-       "url": "/demo/products/16.jpg",
+       "url": "/demo/products/16-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -543,7 +543,7 @@
     },
     "text": "2200 руб."
    },
-   "thumb_photo": "/demo/products/17.jpg",
+   "thumb_photo": "/demo/products/17-tile.jpg",
    "date": 1760036800,
    "albums_ids": [
     4
@@ -553,7 +553,7 @@
      "id": 20171,
      "sizes": [
       {
-       "url": "/demo/products/17.jpg",
+       "url": "/demo/products/17-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -565,7 +565,7 @@
   {
    "id": 2018,
    "owner_id": -100000001,
-   "title": "Рамка-полка или",
+   "title": "Рамка-полка или стеллаж XXL",
    "price": {
     "amount": "150000",
     "currency": {
@@ -574,7 +574,7 @@
     },
     "text": "1500 руб."
    },
-   "thumb_photo": "/demo/products/18.jpg",
+   "thumb_photo": "/demo/products/18-tile.jpg",
    "date": 1759950400,
    "albums_ids": [
     2
@@ -584,7 +584,7 @@
      "id": 20181,
      "sizes": [
       {
-       "url": "/demo/products/18.jpg",
+       "url": "/demo/products/18-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -605,7 +605,7 @@
     },
     "text": "1400 руб."
    },
-   "thumb_photo": "/demo/products/19.jpg",
+   "thumb_photo": "/demo/products/19-tile.jpg",
    "date": 1759864000,
    "albums_ids": [
     2
@@ -615,7 +615,7 @@
      "id": 20191,
      "sizes": [
       {
-       "url": "/demo/products/19.jpg",
+       "url": "/demo/products/19-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -636,7 +636,7 @@
     },
     "text": "2700 руб."
    },
-   "thumb_photo": "/demo/products/20.jpg",
+   "thumb_photo": "/demo/products/20-tile.jpg",
    "date": 1759777600,
    "albums_ids": [
     2
@@ -646,7 +646,7 @@
      "id": 20201,
      "sizes": [
       {
-       "url": "/demo/products/20.jpg",
+       "url": "/demo/products/20-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -667,7 +667,7 @@
     },
     "text": "800 руб."
    },
-   "thumb_photo": "/demo/products/21.jpg",
+   "thumb_photo": "/demo/products/21-tile.jpg",
    "date": 1759691200,
    "albums_ids": [
     1
@@ -677,7 +677,7 @@
      "id": 20211,
      "sizes": [
       {
-       "url": "/demo/products/21.jpg",
+       "url": "/demo/products/21-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -698,7 +698,7 @@
     },
     "text": "1000 руб."
    },
-   "thumb_photo": "/demo/products/22.jpg",
+   "thumb_photo": "/demo/products/22-tile.jpg",
    "date": 1759604800,
    "albums_ids": [
     1
@@ -708,7 +708,7 @@
      "id": 20221,
      "sizes": [
       {
-       "url": "/demo/products/22.jpg",
+       "url": "/demo/products/22-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -720,7 +720,7 @@
   {
    "id": 2023,
    "owner_id": -100000001,
-   "title": "Рамка M",
+   "title": "Рамка М",
    "price": {
     "amount": "90000",
     "currency": {
@@ -729,7 +729,7 @@
     },
     "text": "900 руб."
    },
-   "thumb_photo": "/demo/products/23.jpg",
+   "thumb_photo": "/demo/products/23-tile.jpg",
    "date": 1759518400,
    "albums_ids": [
     1
@@ -739,7 +739,7 @@
      "id": 20231,
      "sizes": [
       {
-       "url": "/demo/products/23.jpg",
+       "url": "/demo/products/23-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -760,7 +760,7 @@
     },
     "text": "1700 руб."
    },
-   "thumb_photo": "/demo/products/24.jpg",
+   "thumb_photo": "/demo/products/24-tile.jpg",
    "date": 1759432000,
    "albums_ids": [
     1
@@ -770,7 +770,7 @@
      "id": 20241,
      "sizes": [
       {
-       "url": "/demo/products/24.jpg",
+       "url": "/demo/products/24-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -791,7 +791,7 @@
     },
     "text": "2100 руб."
    },
-   "thumb_photo": "/demo/products/25.jpg",
+   "thumb_photo": "/demo/products/25-tile.jpg",
    "date": 1759345600,
    "albums_ids": [
     1
@@ -801,7 +801,7 @@
      "id": 20251,
      "sizes": [
       {
-       "url": "/demo/products/25.jpg",
+       "url": "/demo/products/25-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -822,7 +822,7 @@
     },
     "text": "300 руб."
    },
-   "thumb_photo": "/demo/products/26.jpg",
+   "thumb_photo": "/demo/products/26-tile.jpg",
    "date": 1759259200,
    "albums_ids": [
     4
@@ -832,7 +832,7 @@
      "id": 20261,
      "sizes": [
       {
-       "url": "/demo/products/26.jpg",
+       "url": "/demo/products/26-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -853,7 +853,7 @@
     },
     "text": "100 руб."
    },
-   "thumb_photo": "/demo/products/27.jpg",
+   "thumb_photo": "/demo/products/27-tile.jpg",
    "date": 1759172800,
    "albums_ids": [
     4
@@ -863,7 +863,7 @@
      "id": 20271,
      "sizes": [
       {
-       "url": "/demo/products/27.jpg",
+       "url": "/demo/products/27-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"
@@ -884,7 +884,7 @@
     },
     "text": "3500 руб."
    },
-   "thumb_photo": "/demo/products/28.jpg",
+   "thumb_photo": "/demo/products/28-tile.jpg",
    "date": 1759086400,
    "albums_ids": [
     4
@@ -894,7 +894,7 @@
      "id": 20281,
      "sizes": [
       {
-       "url": "/demo/products/28.jpg",
+       "url": "/demo/products/28-tile.jpg",
        "width": 396,
        "height": 444,
        "type": "z"

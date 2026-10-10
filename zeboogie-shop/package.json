@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "demo:photos": "tsx scripts/fetch-demo-photos.ts",
     "sync": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/sync.ts"
   },
   "dependencies": {

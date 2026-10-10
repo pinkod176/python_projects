@@ -4,6 +4,8 @@ import { getEnv } from "@/lib/config/env";
 import { logger } from "@/lib/log";
 import type { Catalog, Product } from "@/lib/types";
 import { getSource } from "@/lib/vk/source";
+import { stat } from "node:fs/promises";
+import path from "node:path";
 import { loadCatalog } from "./store";
 import { isSyncRunning, runSync } from "./sync";
 import { itemIdFromSlug } from "@/lib/format";
@@ -33,6 +35,13 @@ export const getCatalogState = cache(async (): Promise<CatalogState> => {
     return { status: "ok", catalog, stale: false };
   }
 
+  // Демо-данные статичны, но при правке файлов демо (json/фото) снимок пересобирается сам.
+  if (source === "demo" && (await demoFilesChangedSince(catalog.meta.syncedAt)) && !isSyncRunning()) {
+    const result = await runSync();
+    const fresh = result.ok ? await loadCatalog(source) : null;
+    if (fresh) return { status: "ok", catalog: fresh, stale: false };
+  }
+
   const ageMs = Date.now() - new Date(catalog.meta.syncedAt).getTime();
   const stale = ageMs > getEnv().SYNC_TTL_MINUTES * 60_000;
   if (stale && !isSyncRunning() && source === "vk") {
@@ -47,4 +56,15 @@ export async function findProductBySlug(slug: string): Promise<{ catalog: Catalo
   const id = itemIdFromSlug(slug);
   const product = state.catalog.products.find((p) => p.itemId === id);
   return product ? { catalog: state.catalog, product } : null;
+}
+
+async function demoFilesChangedSince(iso: string): Promise<boolean> {
+  const base = process.cwd();
+  const since = new Date(iso).getTime();
+  const paths = [
+    path.join(/* turbopackIgnore: true */ base, "src/lib/vk/demo/market.json"),
+    path.join(/* turbopackIgnore: true */ base, "public/demo/products"),
+  ];
+  const times = await Promise.all(paths.map((p) => stat(p).then((s) => s.mtimeMs).catch(() => 0)));
+  return times.some((t) => t > since);
 }
