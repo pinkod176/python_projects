@@ -7,6 +7,7 @@ import { CartProvider } from "@/components/cart/CartProvider";
 import { DemoBanner } from "@/components/layout/DemoBanner";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { RevealBoot } from "@/components/ui/Reveal";
 import { getCatalogState } from "@/lib/catalog/service";
 import { getEnv, isDemo } from "@/lib/config/env";
 
@@ -25,16 +26,17 @@ export function generateMetadata(): Metadata {
   };
 }
 
-export const viewport: Viewport = { themeColor: "#efe9df", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#f1eae0", width: "device-width", initialScale: 1 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const state = await getCatalogState();
   const collections = state.status === "ok" ? state.catalog.collections : [];
   const shop = state.status === "ok" ? state.catalog.shop : null;
   return (
-    <html lang="ru">
+    <html lang="ru" data-scroll-behavior="smooth">
       <body>
         <CartProvider>
+          <RevealBoot />
           <a href="#content" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[60] focus:bg-ink focus:px-4 focus:py-3 focus:text-paper">
             К содержимому
           </a>

@@ -12,6 +12,8 @@ const VK_IMAGE_HOSTS = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // CSS встраивается в HTML: нет отдельного блокирующего запроса, шрифты находятся раньше.
+  experimental: { inlineCss: true },
   images: {
     remotePatterns: VK_IMAGE_HOSTS.map((hostname) => ({ protocol: "https", hostname })),
     formats: ["image/avif", "image/webp"],

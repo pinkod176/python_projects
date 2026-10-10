@@ -42,10 +42,14 @@ export default async function CatalogPage({ searchParams }: Props) {
   const current = state.catalog.collections.find((c) => c.id === params.category);
 
   return (
-    <div className="container-x py-8 md:py-12">
+    <div className="container-x pb-6 pt-8 md:pt-10">
       <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Каталог", href: current ? "/catalog" : undefined }, ...(current ? [{ label: current.title }] : [])]} />
-      <h1 className="mb-10 mt-6 text-5xl md:text-7xl">Каталог</h1>
-      <CatalogBrowser initial={initial} initialParams={params} />
+      <header className="reveal-load mb-10 mt-8 md:mb-14 md:mt-12">
+        <p className="eyebrow">Работы мастерской</p>
+        <h1 className="mt-3 text-h1 font-light">Каталог</h1>
+      </header>
+      {/* key: при переходе по ссылке с другими параметрами (например, подборка из шапки) браузер каталога пересоздаётся. Клиентская фильтрация меняет URL через replaceState и сервер не перерисовывает, поэтому ключ тогда не меняется. */}
+      <CatalogBrowser key={sp.toString()} initial={initial} initialParams={params} />
     </div>
   );
 }

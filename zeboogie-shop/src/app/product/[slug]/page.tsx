@@ -3,10 +3,13 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { BuyBox } from "@/components/product/BuyBox";
 import { ProductGallery } from "@/components/product/ProductGallery";
+import { MaterialNote } from "@/components/product/MaterialNote";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Price } from "@/components/ui/Price";
+import { Reveal } from "@/components/ui/Reveal";
+import { brand } from "@/content/brand";
 import { relatedProducts, toCard } from "@/lib/catalog/query";
 import { findProductBySlug } from "@/lib/catalog/service";
 import { isDemo } from "@/lib/config/env";
@@ -71,66 +74,97 @@ export default async function ProductPage({ params }: Props) {
         }
       : null;
 
+  // Размеры показываем только если они есть в данных источника — ничего не выдумываем.
+  const isDimension = (name: string) => /размер|габарит|высот|ширин|длин|глубин|диаметр|толщин/i.test(name);
+  const dimensions = product.attributes.filter((a) => isDimension(a.name));
+  const characteristics = product.attributes.filter((a) => !isDimension(a.name));
+
+  const specList = (title: string, rows: { name: string; value: string }[]) =>
+    rows.length > 0 && (
+      <div className="rule mt-8 pt-8">
+        <h2 className="eyebrow">{title}</h2>
+        <dl className="mt-3 divide-y divide-line">
+          {rows.map((a) => (
+            <div key={a.name} className="flex justify-between gap-6 py-3 text-sm">
+              <dt className="text-ink-soft">{a.name}</dt>
+              <dd className="text-right">{a.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    );
+
   return (
-    <div className="container-x py-8 md:py-12">
-      {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />}
-      <Breadcrumbs
-        items={[
-          { label: "Главная", href: "/" },
-          { label: "Каталог", href: "/catalog" },
-          ...(cat ? [{ label: cat.title, href: `/catalog?category=${cat.id}` }] : []),
-          { label: product.title },
-        ]}
-      />
+    <>
+      <div className="container-x pb-6 pt-8 md:pt-10">
+        {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />}
+        <Breadcrumbs
+          items={[
+            { label: "Главная", href: "/" },
+            { label: "Каталог", href: "/catalog" },
+            ...(cat ? [{ label: cat.title, href: `/catalog?category=${cat.id}` }] : []),
+            { label: product.title },
+          ]}
+        />
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-12 lg:gap-16">
-        <div className="lg:col-span-6">
-          <ProductGallery images={product.images} title={product.title} />
-        </div>
-        <div className="lg:col-span-6 lg:pt-4">
-          {cat && <p className="eyebrow">{cat.title}</p>}
-          <h1 className="mt-3 text-4xl leading-tight md:text-6xl">{product.title}</h1>
-          <Price price={product.price} oldPrice={product.oldPrice} size="lg" className="mt-6" />
-          {product.availability !== "unknown" && (
-            <p className="mt-3 flex items-center gap-2 text-sm">
-              <span aria-hidden className={`size-2 rounded-full ${product.availability === "in_stock" ? "bg-moss" : "bg-danger"}`} />
-              {product.availability === "in_stock" ? "В наличии" : "Нет в наличии"}
-            </p>
-          )}
+        <div className="mt-8 grid gap-10 md:mt-12 lg:grid-cols-12 lg:gap-16">
+          <Reveal first soft className="min-w-0 lg:col-span-7">
+            <ProductGallery images={product.images} title={product.title} />
+          </Reveal>
+          <div className="min-w-0 lg:col-span-5">
+            <div className="lg:sticky lg:top-[calc(var(--header-h)+var(--space-3))]">
+              <Reveal first delay={80}>
+                {cat && <p className="eyebrow">{cat.title}</p>}
+                <h1 className="mt-3 text-h2 font-light">{product.title}</h1>
+                <Price price={product.price} oldPrice={product.oldPrice} size="lg" className="mt-6" />
+                {product.availability !== "unknown" && (
+                  <p className="mt-3 flex items-center gap-2 text-sm">
+                    <span aria-hidden className={`size-2 rounded-full ${product.availability === "in_stock" ? "bg-moss" : "bg-danger"}`} />
+                    {product.availability === "in_stock" ? "В наличии" : "Нет в наличии"}
+                  </p>
+                )}
+              </Reveal>
 
-          <div className="rule mt-8 pt-8">
-            <BuyBox card={card} options={product.options} vkUrl={product.vkUrl} />
+              <Reveal first delay={160} className="rule mt-8 pt-8">
+                <BuyBox card={card} options={product.options} vkUrl={product.vkUrl} />
+              </Reveal>
+
+              <Reveal first delay={240} className="rule mt-8 pt-8">
+                <h2 className="eyebrow">Как заказать</h2>
+                <ol className="mt-4 space-y-3">
+                  {brand.orderSteps.map((step, i) => (
+                    <li key={step} className="flex gap-4 text-sm leading-relaxed text-ink-soft">
+                      <span aria-hidden className="font-display text-2xl leading-none text-copper">{i + 1}</span>
+                      <span className="pt-0.5">{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </Reveal>
+
+              {product.description && (
+                <div className="rule mt-8 pt-8">
+                  <h2 className="eyebrow">Описание</h2>
+                  <p className="mt-3 whitespace-pre-line leading-relaxed">{product.description}</p>
+                </div>
+              )}
+              {specList("Размеры", dimensions)}
+              {specList("Характеристики", characteristics)}
+            </div>
           </div>
-
-          {product.description && (
-            <div className="rule mt-8 pt-8">
-              <h2 className="eyebrow !font-sans">Описание</h2>
-              <p className="mt-3 whitespace-pre-line leading-relaxed text-ink/90">{product.description}</p>
-            </div>
-          )}
-
-          {product.attributes.length > 0 && (
-            <div className="rule mt-8 pt-8">
-              <h2 className="eyebrow !font-sans">Характеристики</h2>
-              <dl className="mt-3 divide-y divide-line">
-                {product.attributes.map((a) => (
-                  <div key={a.name} className="flex justify-between gap-6 py-2.5 text-sm">
-                    <dt className="text-ink-soft">{a.name}</dt>
-                    <dd className="text-right">{a.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          )}
         </div>
       </div>
 
+      <MaterialNote />
+
       {related.length > 0 && (
-        <section className="mt-24" aria-labelledby="related">
-          <h2 id="related" className="mb-8 text-3xl md:text-4xl">Смотрите также</h2>
-          <ProductGrid items={related} />
+        <section className="container-x mt-24 md:mt-32" aria-labelledby="related">
+          <Reveal>
+            <p className="eyebrow">Продолжить знакомство</p>
+            <h2 id="related" className="mb-10 mt-3 text-h2 font-light">Смотрите также</h2>
+          </Reveal>
+          <ProductGrid items={related} numbered={false} rail />
         </section>
       )}
-    </div>
+    </>
   );
 }

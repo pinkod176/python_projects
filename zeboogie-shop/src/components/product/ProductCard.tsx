@@ -5,43 +5,43 @@ import { ProductImage } from "@/components/ui/ProductImage";
 import { FavoriteButton } from "./FavoriteButton";
 import { QuickAdd } from "./QuickAdd";
 
-type Props = { card: Card; index?: number; priority?: boolean; sizes?: string };
+type Props = { card: Card; index?: number; priority?: boolean; eager?: boolean; sizes?: string; headingLevel?: 2 | 3 };
 
-export function ProductCard({ card, index, priority, sizes = "(min-width:1024px) 22vw, (min-width:640px) 33vw, 50vw" }: Props) {
+export function ProductCard({ card, index, priority, eager, headingLevel = 3, sizes = "(min-width:1280px) 22vw, (min-width:768px) 30vw, (min-width:520px) 45vw, 92vw" }: Props) {
   const unavailable = card.availability === "unavailable";
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   return (
-    <article className="group relative flex flex-col">
-      <Link href={`/product/${card.slug}`} className="block" aria-label={card.title}>
-        <div className="mat">
-          <div className="relative aspect-[4/5] overflow-hidden bg-paper-3">
+    <article className="card">
+      <Link href={`/product/${card.slug}`} className="block">
+        <div className="card__media mat">
+          <div className="mat-photo">
             <ProductImage
               src={card.image}
-              alt={card.title}
+              alt=""
               sizes={sizes}
               priority={priority}
-              className={`transition-transform duration-700 ease-out-soft motion-safe:group-hover:scale-[1.04] ${unavailable ? "opacity-55 grayscale" : ""}`}
+              eager={eager}
+              className={`card__img ${unavailable ? "opacity-55 grayscale" : ""}`}
             />
             {unavailable && (
-              <span className="absolute left-2 top-2 bg-ink px-2 py-1 text-xs text-paper">Нет в наличии</span>
+              <span className="absolute left-2 top-2 rounded-sm bg-footer px-2 py-1 text-xs text-on-accent">Нет в наличии</span>
             )}
           </div>
         </div>
-        <div className="mt-3 flex items-start gap-3">
+        <div className="mt-4 flex items-start gap-3">
           {index !== undefined && (
-            <span aria-hidden className="mt-1 hidden font-serif text-xs text-ink-soft sm:block">
+            <span aria-hidden className="mt-[0.2rem] text-xs tabular-nums text-ink-soft">
               №{String(index + 1).padStart(2, "0")}
             </span>
           )}
           <div className="min-w-0 flex-1">
-            <h3 className="font-sans text-[0.95rem] font-normal leading-snug tracking-normal [text-wrap:pretty] md:text-base">
-              {card.title}
-            </h3>
-            {card.categoryTitle && <p className="mt-0.5 truncate text-xs text-ink-soft">{card.categoryTitle}</p>}
-            <Price price={card.price} oldPrice={card.oldPrice} className="mt-1.5 text-[0.95rem]" />
+            <Heading className="font-sans text-[1.0625rem] font-normal leading-snug tracking-normal [text-wrap:pretty]">{card.title}</Heading>
+            {card.categoryTitle && <p className="mt-0.5 truncate text-sm text-ink-soft">{card.categoryTitle}</p>}
+            <Price price={card.price} oldPrice={card.oldPrice} className="mt-2" />
           </div>
         </div>
       </Link>
-      <FavoriteButton card={card} className="absolute right-3 top-3 sm:right-4 sm:top-4" />
+      <FavoriteButton card={card} className="card__fav" />
       {!unavailable && <QuickAdd card={card} />}
     </article>
   );

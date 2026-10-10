@@ -12,7 +12,7 @@
     "sync": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/sync.ts"
   },
   "dependencies": {
-    "@fontsource-variable/literata": "^5.3.0",
+    "@fontsource-variable/cormorant-garamond": "^5.3.0",
     "@fontsource-variable/onest": "^5.3.1",
     "lucide-react": "^1.55.0",
     "next": "^16.4.0",

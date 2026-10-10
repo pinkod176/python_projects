@@ -11,10 +11,10 @@ export function Price({ price, oldPrice, size = "sm", className = "" }: Props) {
   const big = size === "lg";
   return (
     <span className={`inline-flex flex-wrap items-baseline gap-x-3 gap-y-0 ${className}`}>
-      <span className={big ? "font-serif text-3xl md:text-4xl" : "font-medium"}>{formatMoney(price)}</span>
+      <span className={big ? "font-display text-h3 font-medium tabular-nums" : "font-medium tabular-nums"}>{formatMoney(price)}</span>
       {oldPrice && (
         <>
-          <s className="text-ink-soft text-sm" aria-label={`Прежняя цена ${formatMoney(oldPrice)}`}>
+          <s className="text-sm text-ink-soft" aria-label={`Прежняя цена ${formatMoney(oldPrice)}`}>
             {formatMoney(oldPrice)}
           </s>
           <span className="text-sm text-wood">−{discountPercent(price, oldPrice)}%</span>

@@ -4,13 +4,55 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Zod · Lu
 Из VK берутся **только товары** (название, описание, цена, фото, подборки). Интерфейс, тексты бренда (`src/content/brand.ts`) и дизайн — собственные.
 
 ## Быстрый старт
+Нужен Node.js 20.9 или новее (рекомендуется 22 LTS) и npm.
+
+**macOS / Linux**
 ```bash
 cd zeboogie-shop
 npm install
 cp .env.example .env.local      # по умолчанию VK_MODE=demo
 npm run dev                     # http://localhost:3000
 ```
+
+**Windows (PowerShell)**
+```powershell
+cd zeboogie-shop
+npm install
+Copy-Item .env.example .env.local   # в cmd.exe: copy .env.example .env.local
+npm run dev                         # откройте http://localhost:3000
+```
+
+Боевой запуск: `npm run build`, затем `npm start` (порт 3000; другой порт — `npm start -- -p 3100`).
 Проверки: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.
+
+## Дизайн-система
+Весь стиль живёт в **одном файле — `src/styles/tokens.css`**: цвета, шрифты, шкала отступов, радиусы, тени, тайминги анимаций, ширина контента, высота шапки. Меняете значение — меняется весь сайт.
+
+| Что меняем | Где |
+|---|---|
+| Палитра (`--bg`, `--surface`, `--border`, `--text`, `--text-soft`, `--moss`, `--copper` …) | `tokens.css`, блок `:root` |
+| Шрифты | `tokens.css` (`--font-ui-stack`, `--font-display-stack`) и `src/styles/fonts.css` (подключаются только кириллица и латиница) |
+| Отступы 8 / 16 / 24 / 40 / 64 / 96 px, ширина контента ≈1280 px | `--space-1…6`, `--section-y`, `--container` |
+| Радиусы 4 / 6 / 8 px, тени, тайминги (`--ease`, `--dur-hover`, `--dur-appear`, `--stagger`) | `tokens.css` |
+| Размеры заголовков (`text-display`, `text-h1…h3`, `text-lead`) | `tokens.css`, блок `@theme` |
+| Готовые компоненты (`.btn`, `.field`, `.chip`, `.mat`, `.card`, `.u-link`, `.drawer`, `.site-header`) и анимации | `src/app/globals.css` |
+
+Палитра: фон `#F1EAE0`, плашки `#E8DFD1` с рамкой `#D9CDBB`, текст `#2E2620`, мох `#5E6B4A`, медь `#A47551`. Чистых белого и чёрного нет.
+Отличия от исходных значений: вторичный текст `#6B5F54` вместо `#7A6E62` (исходный даёт 4,2:1 — ниже AA), для текста и hover-заливок используется более тёмная медь `#865634` (исходная `#A47551` остаётся для линий, иконок и крупных заголовков). Контраст всех пар проверен расчётом.
+
+**Анимации** — только `transform` и `opacity` (плюс цвет у кнопок и ссылок), всё отключается при `prefers-reduced-motion`:
+- появление блоков при прокрутке на `IntersectionObserver` с каскадом 70 мс — `src/components/ui/Reveal.tsx` (сервер отдаёт блоки видимыми, без JS всё читается);
+- шапка сжимается при прокрутке вниз и возвращается при прокрутке вверх — `HeaderFrame.tsx` + CSS `.site-header` (высота в потоке не меняется, раскладка не «прыгает»);
+- карточка: подъём, зум фото 600 мс, сердечко с «пульсом»; кнопка «В корзину» с подтверждением; счётчики в шапке «подпрыгивают»;
+- корзина выезжает как `<dialog>` (`translate` + `@starting-style`), галерея — плавный crossfade;
+- переходы между страницами: нативные View Transitions (`app/template.tsx`) с CSS-фолбэком для браузеров без поддержки;
+- фото проявляются после загрузки (песочная заглушка с мерцанием), первый экран грузится с `fetchpriority="high"`.
+
+## Адаптивность и доступность
+- Каталог: 4 → 3 → 2 → 1 колонка без точек ломания (`.product-grid`, не больше 4); на телефоне подборки вне каталога — горизонтальная лента.
+- Проверено на ширинах 320–1920 px на всех страницах: горизонтальной прокрутки нет, зоны нажатия не меньше 40 px (в основном 44–56 px).
+- Семантическая вёрстка, «таблетки»-фильтры — настоящие radio, видимый фокус, ссылка «К содержимому», подписи у всех контролов. Картинки-ссылки с текстом рядом имеют пустой `alt` (имя даёт подпись), остальные — осмысленный `alt`.
+- Lighthouse (production-сборка, медиана 3 прогонов): Accessibility **100**, Best Practices **100**, CLS 0 на всех страницах. Performance: десктоп **98**, мобильный профиль (медленный 4G, CPU ×4) 86–88 (отдельные прогоны 83–95 — на разных машинах разброс большой). Реальный LCP без троттлинга ≈ 0,3 с. SEO в демо-режиме ниже 100 намеренно: сайт закрыт от индексации (`noindex`).
 
 ## Демо- и рабочий режим
 | `VK_MODE` | Источник | Хранилище |
@@ -56,7 +98,9 @@ npm run dev                     # http://localhost:3000
 ## Структура
 ```
 src/app/            страницы и API (/, /catalog, /product/[slug], /checkout, /favorites, /about, /api/*)
-src/components/     ui, layout, home, catalog, product, cart, checkout
+src/components/     ui (Reveal, ProductImage, Price …), layout, home, catalog, product, cart, checkout
+src/styles/         tokens.css (дизайн-токены), fonts.css
+src/app/template.tsx  переходы между страницами (View Transitions)
 src/lib/vk/         client (лимиты/повторы), api, schemas (zod), mapper, source (demo|live), messages
 src/lib/catalog/    sync, diff, store (файловый снимок), query (фильтры/сортировка/поиск), service (чтение для UI)
 src/content/        тексты бренда (не из VK)
