@@ -9,3 +9,4 @@ data/*.jsonl
 data/*.tmp
 *.tsbuildinfo
 next-env.d.ts
+AGENTS.md
