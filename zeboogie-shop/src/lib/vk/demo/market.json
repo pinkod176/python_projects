@@ -1,5 +1,5 @@
 {
- "_comment": "ДЕМО-ДАННЫЕ в формате ответов VK API. Названия и цены — из выгрузки каталога владельца (xlsx, 11.10.2026); подборки (albums) — условные. Фото: NN-tile.jpg — временные вырезки из скриншотов; если рядом лежат NN-1.jpg, NN-2.jpg… (фото владельца или скачанные скриптом `npm run demo:photos`), source.ts подставляет их вместо вырезки. В режиме live не используются.",
+ "_comment": "ДЕМО-ДАННЫЕ в формате ответов VK API. Названия, цены и фото — из выгрузки каталога владельца (xlsx + архив фото, 11.10.2026); подборки (albums) — условные. В режиме VK_MODE=live не используются.",
  "group": {
   "id": 100000001,
   "name": "demo",
@@ -47,7 +47,7 @@
     },
     "text": "3600 руб."
    },
-   "thumb_photo": "/demo/products/01-tile.jpg",
+   "thumb_photo": "/demo/products/01-1.jpg",
    "date": 1761419200,
    "albums_ids": [
     1
@@ -57,9 +57,9 @@
      "id": 20011,
      "sizes": [
       {
-       "url": "/demo/products/01-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/01-1.jpg",
+       "width": 540,
+       "height": 960,
        "type": "z"
       }
      ]
@@ -78,7 +78,7 @@
     },
     "text": "4000 руб."
    },
-   "thumb_photo": "/demo/products/02-tile.jpg",
+   "thumb_photo": "/demo/products/02-1.jpg",
    "date": 1761332800,
    "albums_ids": [
     1
@@ -88,9 +88,9 @@
      "id": 20021,
      "sizes": [
       {
-       "url": "/demo/products/02-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/02-1.jpg",
+       "width": 540,
+       "height": 960,
        "type": "z"
       }
      ]
@@ -109,7 +109,7 @@
     },
     "text": "1300 руб."
    },
-   "thumb_photo": "/demo/products/03-tile.jpg",
+   "thumb_photo": "/demo/products/03-1.jpg",
    "date": 1761246400,
    "albums_ids": [
     1
@@ -119,9 +119,53 @@
      "id": 20031,
      "sizes": [
       {
-       "url": "/demo/products/03-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/03-1.jpg",
+       "width": 540,
+       "height": 814,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20032,
+     "sizes": [
+      {
+       "url": "/demo/products/03-2.jpg",
+       "width": 540,
+       "height": 960,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20033,
+     "sizes": [
+      {
+       "url": "/demo/products/03-3.jpg",
+       "width": 540,
+       "height": 960,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20034,
+     "sizes": [
+      {
+       "url": "/demo/products/03-4.jpg",
+       "width": 540,
+       "height": 863,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20035,
+     "sizes": [
+      {
+       "url": "/demo/products/03-5.jpg",
+       "width": 540,
+       "height": 850,
        "type": "z"
       }
      ]
@@ -140,7 +184,7 @@
     },
     "text": "1000 руб."
    },
-   "thumb_photo": "/demo/products/04-tile.jpg",
+   "thumb_photo": "/demo/products/04-1.jpg",
    "date": 1761160000,
    "albums_ids": [
     3
@@ -150,9 +194,53 @@
      "id": 20041,
      "sizes": [
       {
-       "url": "/demo/products/04-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/04-1.jpg",
+       "width": 540,
+       "height": 869,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20042,
+     "sizes": [
+      {
+       "url": "/demo/products/04-2.jpg",
+       "width": 540,
+       "height": 960,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20043,
+     "sizes": [
+      {
+       "url": "/demo/products/04-3.jpg",
+       "width": 540,
+       "height": 810,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20044,
+     "sizes": [
+      {
+       "url": "/demo/products/04-4.jpg",
+       "width": 540,
+       "height": 879,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20045,
+     "sizes": [
+      {
+       "url": "/demo/products/04-5.jpg",
+       "width": 540,
+       "height": 825,
        "type": "z"
       }
      ]
@@ -171,7 +259,7 @@
     },
     "text": "1000 руб."
    },
-   "thumb_photo": "/demo/products/05-tile.jpg",
+   "thumb_photo": "/demo/products/05-1.jpg",
    "date": 1761073600,
    "albums_ids": [
     3
@@ -181,9 +269,42 @@
      "id": 20051,
      "sizes": [
       {
-       "url": "/demo/products/05-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/05-1.jpg",
+       "width": 540,
+       "height": 832,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20052,
+     "sizes": [
+      {
+       "url": "/demo/products/05-2.jpg",
+       "width": 540,
+       "height": 960,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20053,
+     "sizes": [
+      {
+       "url": "/demo/products/05-3.jpg",
+       "width": 540,
+       "height": 884,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20054,
+     "sizes": [
+      {
+       "url": "/demo/products/05-4.jpg",
+       "width": 540,
+       "height": 868,
        "type": "z"
       }
      ]
@@ -202,7 +323,7 @@
     },
     "text": "1500 руб."
    },
-   "thumb_photo": "/demo/products/06-tile.jpg",
+   "thumb_photo": "/demo/products/06-1.jpg",
    "date": 1760987200,
    "albums_ids": [
     1
@@ -212,9 +333,42 @@
      "id": 20061,
      "sizes": [
       {
-       "url": "/demo/products/06-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/06-1.jpg",
+       "width": 540,
+       "height": 857,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20062,
+     "sizes": [
+      {
+       "url": "/demo/products/06-2.jpg",
+       "width": 540,
+       "height": 840,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20063,
+     "sizes": [
+      {
+       "url": "/demo/products/06-3.jpg",
+       "width": 540,
+       "height": 874,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20064,
+     "sizes": [
+      {
+       "url": "/demo/products/06-4.jpg",
+       "width": 540,
+       "height": 837,
        "type": "z"
       }
      ]
@@ -233,7 +387,7 @@
     },
     "text": "2500 руб."
    },
-   "thumb_photo": "/demo/products/07-tile.jpg",
+   "thumb_photo": "/demo/products/07-1.jpg",
    "date": 1760900800,
    "albums_ids": [
     1
@@ -243,9 +397,53 @@
      "id": 20071,
      "sizes": [
       {
-       "url": "/demo/products/07-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/07-1.jpg",
+       "width": 540,
+       "height": 829,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20072,
+     "sizes": [
+      {
+       "url": "/demo/products/07-2.jpg",
+       "width": 540,
+       "height": 937,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20073,
+     "sizes": [
+      {
+       "url": "/demo/products/07-3.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20074,
+     "sizes": [
+      {
+       "url": "/demo/products/07-4.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20075,
+     "sizes": [
+      {
+       "url": "/demo/products/07-5.jpg",
+       "width": 540,
+       "height": 960,
        "type": "z"
       }
      ]
@@ -264,7 +462,7 @@
     },
     "text": "4500 руб."
    },
-   "thumb_photo": "/demo/products/08-tile.jpg",
+   "thumb_photo": "/demo/products/08-1.jpg",
    "date": 1760814400,
    "albums_ids": [
     4
@@ -274,9 +472,53 @@
      "id": 20081,
      "sizes": [
       {
-       "url": "/demo/products/08-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/08-1.jpg",
+       "width": 540,
+       "height": 839,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20082,
+     "sizes": [
+      {
+       "url": "/demo/products/08-2.jpg",
+       "width": 540,
+       "height": 917,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20083,
+     "sizes": [
+      {
+       "url": "/demo/products/08-3.jpg",
+       "width": 540,
+       "height": 700,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20084,
+     "sizes": [
+      {
+       "url": "/demo/products/08-4.jpg",
+       "width": 540,
+       "height": 974,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20085,
+     "sizes": [
+      {
+       "url": "/demo/products/08-5.jpg",
+       "width": 540,
+       "height": 771,
        "type": "z"
       }
      ]
@@ -295,7 +537,7 @@
     },
     "text": "800 руб."
    },
-   "thumb_photo": "/demo/products/09-tile.jpg",
+   "thumb_photo": "/demo/products/09-1.jpg",
    "date": 1760728000,
    "albums_ids": [
     3
@@ -305,9 +547,31 @@
      "id": 20091,
      "sizes": [
       {
-       "url": "/demo/products/09-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/09-1.jpg",
+       "width": 540,
+       "height": 766,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20092,
+     "sizes": [
+      {
+       "url": "/demo/products/09-2.jpg",
+       "width": 540,
+       "height": 842,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20093,
+     "sizes": [
+      {
+       "url": "/demo/products/09-3.jpg",
+       "width": 540,
+       "height": 801,
        "type": "z"
       }
      ]
@@ -326,7 +590,7 @@
     },
     "text": "600 руб."
    },
-   "thumb_photo": "/demo/products/10-tile.jpg",
+   "thumb_photo": "/demo/products/10-1.jpg",
    "date": 1760641600,
    "albums_ids": [
     4
@@ -336,9 +600,53 @@
      "id": 20101,
      "sizes": [
       {
-       "url": "/demo/products/10-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/10-1.jpg",
+       "width": 1080,
+       "height": 707,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20102,
+     "sizes": [
+      {
+       "url": "/demo/products/10-2.jpg",
+       "width": 540,
+       "height": 613,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20103,
+     "sizes": [
+      {
+       "url": "/demo/products/10-3.jpg",
+       "width": 1080,
+       "height": 858,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20104,
+     "sizes": [
+      {
+       "url": "/demo/products/10-4.jpg",
+       "width": 540,
+       "height": 771,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20105,
+     "sizes": [
+      {
+       "url": "/demo/products/10-5.jpg",
+       "width": 540,
+       "height": 886,
        "type": "z"
       }
      ]
@@ -357,7 +665,7 @@
     },
     "text": "600 руб."
    },
-   "thumb_photo": "/demo/products/11-tile.jpg",
+   "thumb_photo": "/demo/products/11-1.jpg",
    "date": 1760555200,
    "albums_ids": [
     4
@@ -367,9 +675,53 @@
      "id": 20111,
      "sizes": [
       {
-       "url": "/demo/products/11-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/11-1.jpg",
+       "width": 540,
+       "height": 833,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20112,
+     "sizes": [
+      {
+       "url": "/demo/products/11-2.jpg",
+       "width": 540,
+       "height": 875,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20113,
+     "sizes": [
+      {
+       "url": "/demo/products/11-3.jpg",
+       "width": 540,
+       "height": 761,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20114,
+     "sizes": [
+      {
+       "url": "/demo/products/11-4.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20115,
+     "sizes": [
+      {
+       "url": "/demo/products/11-5.jpg",
+       "width": 540,
+       "height": 826,
        "type": "z"
       }
      ]
@@ -388,7 +740,7 @@
     },
     "text": "4500 руб."
    },
-   "thumb_photo": "/demo/products/12-tile.jpg",
+   "thumb_photo": "/demo/products/12-1.jpg",
    "date": 1760468800,
    "albums_ids": [
     2
@@ -398,9 +750,53 @@
      "id": 20121,
      "sizes": [
       {
-       "url": "/demo/products/12-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/12-1.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20122,
+     "sizes": [
+      {
+       "url": "/demo/products/12-2.jpg",
+       "width": 540,
+       "height": 747,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20123,
+     "sizes": [
+      {
+       "url": "/demo/products/12-3.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20124,
+     "sizes": [
+      {
+       "url": "/demo/products/12-4.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20125,
+     "sizes": [
+      {
+       "url": "/demo/products/12-5.jpg",
+       "width": 540,
+       "height": 759,
        "type": "z"
       }
      ]
@@ -419,7 +815,7 @@
     },
     "text": "900 руб."
    },
-   "thumb_photo": "/demo/products/13-tile.jpg",
+   "thumb_photo": "/demo/products/13-1.jpg",
    "date": 1760382400,
    "albums_ids": [
     1
@@ -429,9 +825,53 @@
      "id": 20131,
      "sizes": [
       {
-       "url": "/demo/products/13-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/13-1.jpg",
+       "width": 540,
+       "height": 540,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20132,
+     "sizes": [
+      {
+       "url": "/demo/products/13-2.jpg",
+       "width": 540,
+       "height": 960,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20133,
+     "sizes": [
+      {
+       "url": "/demo/products/13-3.jpg",
+       "width": 540,
+       "height": 684,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20134,
+     "sizes": [
+      {
+       "url": "/demo/products/13-4.jpg",
+       "width": 540,
+       "height": 719,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20135,
+     "sizes": [
+      {
+       "url": "/demo/products/13-5.jpg",
+       "width": 540,
+       "height": 530,
        "type": "z"
       }
      ]
@@ -450,7 +890,7 @@
     },
     "text": "25000 руб."
    },
-   "thumb_photo": "/demo/products/14-tile.jpg",
+   "thumb_photo": "/demo/products/14-1.jpg",
    "date": 1760296000,
    "albums_ids": [
     4
@@ -460,9 +900,42 @@
      "id": 20141,
      "sizes": [
       {
-       "url": "/demo/products/14-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/14-1.jpg",
+       "width": 540,
+       "height": 647,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20142,
+     "sizes": [
+      {
+       "url": "/demo/products/14-2.jpg",
+       "width": 540,
+       "height": 679,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20143,
+     "sizes": [
+      {
+       "url": "/demo/products/14-3.jpg",
+       "width": 540,
+       "height": 698,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20144,
+     "sizes": [
+      {
+       "url": "/demo/products/14-4.jpg",
+       "width": 540,
+       "height": 890,
        "type": "z"
       }
      ]
@@ -481,7 +954,7 @@
     },
     "text": "88000 руб."
    },
-   "thumb_photo": "/demo/products/15-tile.jpg",
+   "thumb_photo": "/demo/products/15-1.jpg",
    "date": 1760209600,
    "albums_ids": [
     4
@@ -491,9 +964,53 @@
      "id": 20151,
      "sizes": [
       {
-       "url": "/demo/products/15-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/15-1.jpg",
+       "width": 540,
+       "height": 777,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20152,
+     "sizes": [
+      {
+       "url": "/demo/products/15-2.jpg",
+       "width": 540,
+       "height": 680,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20153,
+     "sizes": [
+      {
+       "url": "/demo/products/15-3.jpg",
+       "width": 540,
+       "height": 576,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20154,
+     "sizes": [
+      {
+       "url": "/demo/products/15-4.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20155,
+     "sizes": [
+      {
+       "url": "/demo/products/15-5.jpg",
+       "width": 540,
+       "height": 709,
        "type": "z"
       }
      ]
@@ -512,7 +1029,7 @@
     },
     "text": "1500 руб."
    },
-   "thumb_photo": "/demo/products/16-tile.jpg",
+   "thumb_photo": "/demo/products/16-1.jpg",
    "date": 1760123200,
    "albums_ids": [
     2
@@ -522,9 +1039,53 @@
      "id": 20161,
      "sizes": [
       {
-       "url": "/demo/products/16-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/16-1.jpg",
+       "width": 540,
+       "height": 787,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20162,
+     "sizes": [
+      {
+       "url": "/demo/products/16-2.jpg",
+       "width": 540,
+       "height": 960,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20163,
+     "sizes": [
+      {
+       "url": "/demo/products/16-3.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20164,
+     "sizes": [
+      {
+       "url": "/demo/products/16-4.jpg",
+       "width": 540,
+       "height": 656,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20165,
+     "sizes": [
+      {
+       "url": "/demo/products/16-5.jpg",
+       "width": 540,
+       "height": 702,
        "type": "z"
       }
      ]
@@ -543,7 +1104,7 @@
     },
     "text": "2200 руб."
    },
-   "thumb_photo": "/demo/products/17-tile.jpg",
+   "thumb_photo": "/demo/products/17-1.jpg",
    "date": 1760036800,
    "albums_ids": [
     4
@@ -553,9 +1114,42 @@
      "id": 20171,
      "sizes": [
       {
-       "url": "/demo/products/17-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/17-1.jpg",
+       "width": 540,
+       "height": 518,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20172,
+     "sizes": [
+      {
+       "url": "/demo/products/17-2.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20173,
+     "sizes": [
+      {
+       "url": "/demo/products/17-3.jpg",
+       "width": 540,
+       "height": 649,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20174,
+     "sizes": [
+      {
+       "url": "/demo/products/17-4.jpg",
+       "width": 540,
+       "height": 647,
        "type": "z"
       }
      ]
@@ -574,7 +1168,7 @@
     },
     "text": "1500 руб."
    },
-   "thumb_photo": "/demo/products/18-tile.jpg",
+   "thumb_photo": "/demo/products/18-1.jpg",
    "date": 1759950400,
    "albums_ids": [
     2
@@ -584,9 +1178,53 @@
      "id": 20181,
      "sizes": [
       {
-       "url": "/demo/products/18-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/18-1.jpg",
+       "width": 540,
+       "height": 960,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20182,
+     "sizes": [
+      {
+       "url": "/demo/products/18-2.jpg",
+       "width": 540,
+       "height": 916,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20183,
+     "sizes": [
+      {
+       "url": "/demo/products/18-3.jpg",
+       "width": 540,
+       "height": 880,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20184,
+     "sizes": [
+      {
+       "url": "/demo/products/18-4.jpg",
+       "width": 540,
+       "height": 540,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20185,
+     "sizes": [
+      {
+       "url": "/demo/products/18-5.jpg",
+       "width": 540,
+       "height": 713,
        "type": "z"
       }
      ]
@@ -605,7 +1243,7 @@
     },
     "text": "1400 руб."
    },
-   "thumb_photo": "/demo/products/19-tile.jpg",
+   "thumb_photo": "/demo/products/19-1.jpg",
    "date": 1759864000,
    "albums_ids": [
     2
@@ -615,9 +1253,53 @@
      "id": 20191,
      "sizes": [
       {
-       "url": "/demo/products/19-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/19-1.jpg",
+       "width": 540,
+       "height": 705,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20192,
+     "sizes": [
+      {
+       "url": "/demo/products/19-2.jpg",
+       "width": 540,
+       "height": 540,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20193,
+     "sizes": [
+      {
+       "url": "/demo/products/19-3.jpg",
+       "width": 540,
+       "height": 665,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20194,
+     "sizes": [
+      {
+       "url": "/demo/products/19-4.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20195,
+     "sizes": [
+      {
+       "url": "/demo/products/19-5.jpg",
+       "width": 540,
+       "height": 582,
        "type": "z"
       }
      ]
@@ -636,7 +1318,7 @@
     },
     "text": "2700 руб."
    },
-   "thumb_photo": "/demo/products/20-tile.jpg",
+   "thumb_photo": "/demo/products/20-1.jpg",
    "date": 1759777600,
    "albums_ids": [
     2
@@ -646,9 +1328,53 @@
      "id": 20201,
      "sizes": [
       {
-       "url": "/demo/products/20-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/20-1.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20202,
+     "sizes": [
+      {
+       "url": "/demo/products/20-2.jpg",
+       "width": 540,
+       "height": 540,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20203,
+     "sizes": [
+      {
+       "url": "/demo/products/20-3.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20204,
+     "sizes": [
+      {
+       "url": "/demo/products/20-4.jpg",
+       "width": 540,
+       "height": 540,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20205,
+     "sizes": [
+      {
+       "url": "/demo/products/20-5.jpg",
+       "width": 540,
+       "height": 720,
        "type": "z"
       }
      ]
@@ -667,7 +1393,7 @@
     },
     "text": "800 руб."
    },
-   "thumb_photo": "/demo/products/21-tile.jpg",
+   "thumb_photo": "/demo/products/21-1.jpg",
    "date": 1759691200,
    "albums_ids": [
     1
@@ -677,9 +1403,53 @@
      "id": 20211,
      "sizes": [
       {
-       "url": "/demo/products/21-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/21-1.jpg",
+       "width": 540,
+       "height": 1013,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20212,
+     "sizes": [
+      {
+       "url": "/demo/products/21-2.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20213,
+     "sizes": [
+      {
+       "url": "/demo/products/21-3.jpg",
+       "width": 510,
+       "height": 695,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20214,
+     "sizes": [
+      {
+       "url": "/demo/products/21-4.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20215,
+     "sizes": [
+      {
+       "url": "/demo/products/21-5.jpg",
+       "width": 540,
+       "height": 697,
        "type": "z"
       }
      ]
@@ -698,7 +1468,7 @@
     },
     "text": "1000 руб."
    },
-   "thumb_photo": "/demo/products/22-tile.jpg",
+   "thumb_photo": "/demo/products/22-1.jpg",
    "date": 1759604800,
    "albums_ids": [
     1
@@ -708,9 +1478,53 @@
      "id": 20221,
      "sizes": [
       {
-       "url": "/demo/products/22-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/22-1.jpg",
+       "width": 540,
+       "height": 669,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20222,
+     "sizes": [
+      {
+       "url": "/demo/products/22-2.jpg",
+       "width": 540,
+       "height": 717,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20223,
+     "sizes": [
+      {
+       "url": "/demo/products/22-3.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20224,
+     "sizes": [
+      {
+       "url": "/demo/products/22-4.jpg",
+       "width": 540,
+       "height": 960,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20225,
+     "sizes": [
+      {
+       "url": "/demo/products/22-5.jpg",
+       "width": 540,
+       "height": 848,
        "type": "z"
       }
      ]
@@ -729,7 +1543,7 @@
     },
     "text": "900 руб."
    },
-   "thumb_photo": "/demo/products/23-tile.jpg",
+   "thumb_photo": "/demo/products/23-1.jpg",
    "date": 1759518400,
    "albums_ids": [
     1
@@ -739,9 +1553,53 @@
      "id": 20231,
      "sizes": [
       {
-       "url": "/demo/products/23-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/23-1.jpg",
+       "width": 540,
+       "height": 1055,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20232,
+     "sizes": [
+      {
+       "url": "/demo/products/23-2.jpg",
+       "width": 540,
+       "height": 902,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20233,
+     "sizes": [
+      {
+       "url": "/demo/products/23-3.jpg",
+       "width": 540,
+       "height": 902,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20234,
+     "sizes": [
+      {
+       "url": "/demo/products/23-4.jpg",
+       "width": 540,
+       "height": 860,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20235,
+     "sizes": [
+      {
+       "url": "/demo/products/23-5.jpg",
+       "width": 540,
+       "height": 754,
        "type": "z"
       }
      ]
@@ -760,7 +1618,7 @@
     },
     "text": "1700 руб."
    },
-   "thumb_photo": "/demo/products/24-tile.jpg",
+   "thumb_photo": "/demo/products/24-1.jpg",
    "date": 1759432000,
    "albums_ids": [
     1
@@ -770,9 +1628,42 @@
      "id": 20241,
      "sizes": [
       {
-       "url": "/demo/products/24-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/24-1.jpg",
+       "width": 540,
+       "height": 809,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20242,
+     "sizes": [
+      {
+       "url": "/demo/products/24-2.jpg",
+       "width": 540,
+       "height": 727,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20243,
+     "sizes": [
+      {
+       "url": "/demo/products/24-3.jpg",
+       "width": 540,
+       "height": 960,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20244,
+     "sizes": [
+      {
+       "url": "/demo/products/24-4.jpg",
+       "width": 540,
+       "height": 793,
        "type": "z"
       }
      ]
@@ -791,7 +1682,7 @@
     },
     "text": "2100 руб."
    },
-   "thumb_photo": "/demo/products/25-tile.jpg",
+   "thumb_photo": "/demo/products/25-1.jpg",
    "date": 1759345600,
    "albums_ids": [
     1
@@ -801,9 +1692,53 @@
      "id": 20251,
      "sizes": [
       {
-       "url": "/demo/products/25-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/25-1.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20252,
+     "sizes": [
+      {
+       "url": "/demo/products/25-2.jpg",
+       "width": 540,
+       "height": 683,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20253,
+     "sizes": [
+      {
+       "url": "/demo/products/25-3.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20254,
+     "sizes": [
+      {
+       "url": "/demo/products/25-4.jpg",
+       "width": 540,
+       "height": 705,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20255,
+     "sizes": [
+      {
+       "url": "/demo/products/25-5.jpg",
+       "width": 540,
+       "height": 688,
        "type": "z"
       }
      ]
@@ -822,7 +1757,7 @@
     },
     "text": "300 руб."
    },
-   "thumb_photo": "/demo/products/26-tile.jpg",
+   "thumb_photo": "/demo/products/26-1.jpg",
    "date": 1759259200,
    "albums_ids": [
     4
@@ -832,9 +1767,42 @@
      "id": 20261,
      "sizes": [
       {
-       "url": "/demo/products/26-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/26-1.jpg",
+       "width": 540,
+       "height": 960,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20262,
+     "sizes": [
+      {
+       "url": "/demo/products/26-2.jpg",
+       "width": 540,
+       "height": 875,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20263,
+     "sizes": [
+      {
+       "url": "/demo/products/26-3.jpg",
+       "width": 540,
+       "height": 813,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20264,
+     "sizes": [
+      {
+       "url": "/demo/products/26-4.jpg",
+       "width": 540,
+       "height": 515,
        "type": "z"
       }
      ]
@@ -853,7 +1821,7 @@
     },
     "text": "100 руб."
    },
-   "thumb_photo": "/demo/products/27-tile.jpg",
+   "thumb_photo": "/demo/products/27-1.jpg",
    "date": 1759172800,
    "albums_ids": [
     4
@@ -863,9 +1831,53 @@
      "id": 20271,
      "sizes": [
       {
-       "url": "/demo/products/27-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/27-1.jpg",
+       "width": 1080,
+       "height": 810,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20272,
+     "sizes": [
+      {
+       "url": "/demo/products/27-2.jpg",
+       "width": 540,
+       "height": 720,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20273,
+     "sizes": [
+      {
+       "url": "/demo/products/27-3.jpg",
+       "width": 1080,
+       "height": 810,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20274,
+     "sizes": [
+      {
+       "url": "/demo/products/27-4.jpg",
+       "width": 540,
+       "height": 718,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20275,
+     "sizes": [
+      {
+       "url": "/demo/products/27-5.jpg",
+       "width": 540,
+       "height": 773,
        "type": "z"
       }
      ]
@@ -884,7 +1896,7 @@
     },
     "text": "3500 руб."
    },
-   "thumb_photo": "/demo/products/28-tile.jpg",
+   "thumb_photo": "/demo/products/28-1.jpg",
    "date": 1759086400,
    "albums_ids": [
     4
@@ -894,9 +1906,53 @@
      "id": 20281,
      "sizes": [
       {
-       "url": "/demo/products/28-tile.jpg",
-       "width": 396,
-       "height": 444,
+       "url": "/demo/products/28-1.jpg",
+       "width": 540,
+       "height": 875,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20282,
+     "sizes": [
+      {
+       "url": "/demo/products/28-2.jpg",
+       "width": 540,
+       "height": 885,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20283,
+     "sizes": [
+      {
+       "url": "/demo/products/28-3.jpg",
+       "width": 540,
+       "height": 959,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20284,
+     "sizes": [
+      {
+       "url": "/demo/products/28-4.jpg",
+       "width": 540,
+       "height": 923,
+       "type": "z"
+      }
+     ]
+    },
+    {
+     "id": 20285,
+     "sizes": [
+      {
+       "url": "/demo/products/28-5.jpg",
+       "width": 540,
+       "height": 840,
        "type": "z"
       }
      ]
