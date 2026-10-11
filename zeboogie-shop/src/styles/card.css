@@ -155,11 +155,12 @@
     .card:hover .card__body .card__title, .card:focus-within .card__body .card__title { color: var(--copper-deep); }
     .card__title { transition: color var(--dur-hover) var(--ease); }
 
-    /* Сердечко и панель действий проявляются при наведении или фокусе; пока скрыты — не перехватывают клики. */
-    .card__fav, .card__actions { opacity: 0; visibility: hidden; translate: 0 4px; transition: opacity var(--dur-hover) var(--ease), translate var(--dur-hover) var(--ease), visibility 0s linear var(--dur-hover), background-color var(--dur-hover) var(--ease), transform var(--dur-hover) var(--ease); }
+    /* Сердечко и панель действий проявляются при наведении или фокусе. Пока скрыты — не ловят мышь (pointer-events: none),
+       но остаются в порядке Tab: с клавиатуры они появляются при фокусе (focus-within) и доступны. */
+    .card__fav, .card__actions { opacity: 0; pointer-events: none; translate: 0 4px; transition: opacity var(--dur-hover) var(--ease), translate var(--dur-hover) var(--ease), background-color var(--dur-hover) var(--ease), transform var(--dur-hover) var(--ease); }
     .card:hover .card__fav, .card:focus-within .card__fav,
     .card:hover .card__actions, .card:focus-within .card__actions,
-    .card__fav[aria-pressed="true"] { opacity: 1; visibility: visible; translate: 0 0; transition-delay: 0s; }
+    .card__fav[aria-pressed="true"] { opacity: 1; pointer-events: auto; translate: 0 0; }
     .card__actions { left: calc(clamp(6px, 1vw, 10px) + 4px); flex-direction: column; gap: 6px; }
     .card__quick { display: inline-flex; flex: none; min-height: 2.5rem; }
     .card__add { flex: none; min-height: 2.5rem; }

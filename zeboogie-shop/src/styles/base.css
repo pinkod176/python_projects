@@ -16,6 +16,8 @@
   }
   /* Пока открыто модальное окно (меню, фильтры, корзина), страница под ним не прокручивается. */
   html:has(dialog[open]) { overflow: hidden; }
+  /* Закреплённые нижние панели (покупка, оформление) не закрывают то, к чему прокручивает якорь или фокус. */
+  html:has(.buybar), html:has(.checkout-bar) { scroll-padding-bottom: calc(5rem + var(--safe-b)); }
 
   body {
     font-family: var(--font-ui-stack);

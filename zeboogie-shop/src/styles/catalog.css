@@ -32,8 +32,8 @@
    */
   .catalog-top {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
-    grid-template-areas: "head view" "pills pills" "filters sort";
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "head head view" "pills pills pills" "filters sort sort";
     align-items: center;
     gap: var(--hit-gap) var(--space-2);
   }
@@ -51,6 +51,7 @@
   .catalog-count strong { color: var(--text); font-weight: 500; }
   .catalog-filters-btn { grid-area: filters; position: relative; }
   .catalog-filters-btn .badge { position: static; animation: none; margin-left: 0.15rem; }
+  @media (max-width: 639px) { .catalog-filters-btn { min-width: var(--hit); padding-inline: 0.75rem; gap: 0.35rem; } }
   .catalog-sort { grid-area: sort; position: relative; display: block; }
   .catalog-sort select {
     width: 100%;
@@ -61,20 +62,21 @@
     border: 1px solid var(--border-strong);
     border-radius: var(--r);
     background: transparent;
-    font-size: 0.9rem;
+    font-size: max(1rem, 16px); /* меньше 16 px — iPhone приближает страницу при фокусе */
     cursor: pointer;
     transition: border-color var(--dur-hover) var(--ease), background-color var(--dur-hover) var(--ease);
   }
   .catalog-sort select:active { background: var(--surface-deep); }
   @media (hover: hover) and (pointer: fine) { .catalog-sort select:hover { border-color: var(--moss); background: var(--surface); } }
+  @media (min-width: 640px) { .catalog-sort select { font-size: 0.9rem; } }
   .catalog-sort svg { position: absolute; right: 0.75rem; top: 50%; translate: 0 -50%; pointer-events: none; color: var(--text-soft); }
 
   /* Переключатель вида сетки */
-  .seg { grid-area: view; display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--border-strong); border-radius: var(--r); }
+  .seg { grid-area: view; display: inline-flex; gap: var(--hit-gap); padding: 2px; border: 1px solid var(--border-strong); border-radius: var(--r); }
   .seg button {
     display: grid;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: var(--hit);
+    height: var(--hit);
     place-items: center;
     border-radius: calc(var(--r) - 2px);
     color: var(--text-soft);

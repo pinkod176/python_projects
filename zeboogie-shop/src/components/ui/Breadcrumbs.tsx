@@ -8,8 +8,8 @@ export type Crumb = { label: string; href?: string };
  */
 export function Breadcrumbs({ items }: { items: Crumb[] }) {
   return (
-    <nav aria-label="Хлебные крошки" className="text-sm text-ink-soft">
-      <ol className="flex flex-nowrap items-center gap-x-2.5 md:flex-wrap">
+    <nav aria-label="Хлебные крошки" className="min-w-0 text-sm text-ink-soft">
+      <ol className="flex min-w-0 flex-nowrap items-center gap-x-2.5 md:flex-wrap">
         {items.map((c, i) => {
           const last = i === items.length - 1;
           return (

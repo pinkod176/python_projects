@@ -12,7 +12,7 @@ type Props = {
   onChange: (next: { min?: string; max?: string }) => void;
 };
 
-const THUMB = 28; // px, как в .range (ширина ручки)
+const THUMB = 44; // px, как в .range (зона нажатия ручки; видимый кружок — 28 px внутри)
 const at = (pct: number) => `calc(${pct}% + ${((0.5 - pct / 100) * THUMB).toFixed(2)}px)`;
 
 /**

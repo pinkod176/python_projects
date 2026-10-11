@@ -61,7 +61,8 @@
     transform-origin: left center;
     transition: transform var(--dur-header) var(--ease);
   }
-  .site-header[data-compact="true"] .site-header__brand { transform: scale(0.88); }
+  /* Логотип уменьшается на 12 %, но зона нажатия остаётся не меньше 44 px (запас 1 / 0,88). */
+  .site-header[data-compact="true"] .site-header__brand { transform: scale(0.88); min-height: calc(var(--hit) / 0.88); }
   .site-header__actions { display: flex; align-items: center; gap: var(--hit-gap); }
 
   /* ───── Вкладки (десктоп ≥ 1280 px; ниже — бургер) ───── */

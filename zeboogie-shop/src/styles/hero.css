@@ -28,7 +28,8 @@
 
   /* ───── Сцена ───── */
   .hero__stage {
-    --slide-h: clamp(19rem, calc(100dvh - var(--top-offset) - var(--bar-h) - var(--safe-b) - 15rem), 32rem);
+    /* 18rem — всё, что занимает экран кроме фото: заголовок, кнопки, отступы и точки. Так hero целиком вписывается в 100dvh над нижней панелью. */
+    --slide-h: clamp(16rem, calc(100dvh - var(--top-offset) - var(--bar-h) - var(--safe-b) - 18rem), 32rem);
     --slide-w: min(calc(var(--slide-h) * 0.8), 80vw);
     position: relative;
     margin-top: var(--space-1);
@@ -62,11 +63,13 @@
     scroll-snap-align: center;
     scroll-snap-stop: always;
     transition: scale 700ms var(--ease), opacity 700ms var(--ease);
-    opacity: 0.8;
     scale: 0.92;
   }
-  .hero__slide[data-active="true"] { opacity: 1; scale: 1; }
-  @media (min-width: 1024px) { .hero__slide { scale: 0.82; opacity: 0.72; } .hero__slide[data-active="true"] { scale: 1; opacity: 1; } }
+  .hero__slide[data-active="true"] { scale: 1; }
+  /* Затемняем только фото соседних работ: подпись остаётся контрастной. */
+  .hero__slide .hero-img { transition: opacity 700ms var(--ease), transform var(--dur-hover-slow) var(--ease); }
+  .hero__slide:not([data-active="true"]) .hero-img { opacity: 0.75; }
+  @media (min-width: 1024px) { .hero__slide { scale: 0.82; } .hero__slide[data-active="true"] { scale: 1; } }
   .hero__card { display: block; }
   .hero__mat { display: block; box-shadow: var(--sh-soft); }
   .hero__photo { aspect-ratio: 4 / 5; }

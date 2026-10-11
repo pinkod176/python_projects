@@ -1,8 +1,9 @@
 "use client";
 
 import { ChevronDown, Grid2x2, SlidersHorizontal, Square } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DEFAULT_PARAMS, toApiQuery, toPageQuery, type UiParams } from "@/lib/catalog/params";
+import { DEFAULT_PARAMS, paramsFromSearch, toApiQuery, toPageQuery, type UiParams } from "@/lib/catalog/params";
 import type { CatalogResult } from "@/lib/catalog/query";
 import { loadCatalogRestore, justNavigatedBack, saveCatalogRestore } from "@/lib/catalog/restore";
 import { plural } from "@/lib/format";
@@ -68,6 +69,21 @@ export function CatalogBrowser({ initial, initialParams }: { initial: CatalogRes
     }, 250);
     return () => clearTimeout(t);
   }, [params, fetchPage]);
+
+  // Переход по ссылке на каталог с другими параметрами (подборка в шапке, «крошки», нижняя панель) после того, как мы сами меняли адрес
+  // через replaceState: сервер страницу не пересобирает, поэтому подхватываем новый адрес здесь.
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const next = paramsFromSearch(new URLSearchParams(searchParams.toString()));
+    const incoming = toPageQuery(next);
+    if (incoming === loadedKey.current || incoming === toPageQuery(params)) return; // это наше собственное обновление адреса
+    loadedKey.current = incoming;
+    live.current = { key: incoming, pages: 1 };
+    setParams(next);
+    void fetchPage(next, 1, false);
+    // Реагируем только на изменение адреса.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   useEffect(() => {
     live.current.pages = data.page;
@@ -161,7 +177,8 @@ export function CatalogBrowser({ initial, initialParams }: { initial: CatalogRes
             onClick={onFiltersClick}
           >
             <SlidersHorizontal aria-hidden className="size-4" strokeWidth={1.75} />
-            Фильтры
+            {/* На телефоне — только значок со счётчиком, чтобы «Сортировка» получила всю остальную ширину. */}
+            <span className="max-sm:sr-only">Фильтры</span>
             {activeCount > 0 && <span className="badge">{activeCount}</span>}
           </button>
         )}

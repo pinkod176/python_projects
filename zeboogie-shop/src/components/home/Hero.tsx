@@ -29,7 +29,7 @@ export function Hero({ slides }: { slides: ProductCard[] }) {
             <Link href="/catalog" className="btn btn-solid">
               Каталог <ArrowRight aria-hidden className="size-4" />
             </Link>
-            <Link href="/about" className="u-link py-2 text-[0.95rem]">О мастерской</Link>
+            <Link href="/about" className="u-link inline-flex min-h-11 items-center text-[0.95rem]">О мастерской</Link>
           </div>
         </Reveal>
       </div>

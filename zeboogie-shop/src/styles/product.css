@@ -14,8 +14,9 @@
 
 /* ───────────────────────── Страница товара ───────────────────────── */
 @layer components {
-  .pdp { display: grid; gap: var(--space-2) var(--space-5); }
-  .pdp__crumbs { grid-area: crumbs; }
+  /* minmax(0, 1fr): длинная «крошка» не должна растягивать колонку шире экрана (иначе телефон «отдаляет» страницу и панель покупки уезжает). */
+  .pdp { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2) var(--space-5); }
+  .pdp__crumbs { grid-area: crumbs; min-width: 0; }
   .pdp__gallery { grid-area: gallery; min-width: 0; }
   .pdp__info { grid-area: info; min-width: 0; }
   .pdp { grid-template-areas: "crumbs" "gallery" "info"; }
@@ -33,7 +34,7 @@
       padding-block: var(--space-1) 0;
     }
     /* Колонка справа не выше первого экрана; если текста больше (длинное название, много вариантов) — прокручивается внутри. */
-    .pdp__info { max-height: calc(var(--pdp-h) - 3rem); overflow-y: auto; overscroll-behavior: contain; padding: 0 0.5rem 0.5rem 0; scrollbar-width: thin; }
+    .pdp__info { max-height: calc(var(--pdp-h) - 3rem); overflow-y: auto; overscroll-behavior: contain; padding: 6px 0.5rem 0.5rem 6px; margin-left: -6px; scrollbar-width: thin; }
   }
 
   /* ── Галерея ── */
@@ -97,7 +98,7 @@
   @media (min-width: 768px) { .gallery__arrow { display: grid; } }
   @media (hover: hover) and (pointer: fine) { .gallery__arrow:hover { background: var(--bg); } }
 
-  .gallery__dots { position: absolute; left: 50%; bottom: 0.75rem; z-index: 2; display: flex; translate: -50% 0; padding-inline: 0.25rem; border-radius: 999px; background: rgb(46 38 32 / 0.42); }
+  .gallery__dots { position: absolute; left: 50%; bottom: 0.75rem; z-index: 2; display: flex; gap: var(--hit-gap); translate: -50% 0; padding-inline: 0.25rem; border-radius: 999px; background: rgb(46 38 32 / 0.42); }
   @media (min-width: 768px) { .gallery__dots { display: none; } }
   .gallery__dot { position: relative; display: grid; width: var(--hit); height: var(--hit); place-items: center; }
   .gallery__dot::before { content: ""; width: 0.5rem; height: 0.5rem; border-radius: 999px; background: var(--on-accent); opacity: 0.55; transition: width 360ms var(--ease), opacity 360ms var(--ease); }
@@ -107,7 +108,7 @@
 
   /* ── Крупный просмотр ── */
   .lightbox { background: var(--footer-bg); color: var(--on-accent); }
-  .lightbox__stage { display: grid; flex: 1; min-height: 0; place-items: center; overflow: hidden; padding: 3.5rem var(--space-2) var(--space-2); }
+  .lightbox__stage { display: grid; grid-template-columns: minmax(0, 1fr); flex: 1; min-height: 0; place-items: center; overflow: hidden; padding: 3.5rem var(--space-2) var(--space-2); }
   .lightbox__frame { position: relative; display: block; height: 100%; max-height: 100%; transition: transform 380ms var(--ease); will-change: transform; }
   .lightbox__close { position: absolute; top: 0.5rem; right: 0.5rem; z-index: 3; color: var(--on-accent); }
   .lightbox__close:active { background: rgb(247 241 231 / 0.18); }
@@ -141,4 +142,9 @@
   @keyframes rise-bar { from { transform: translateY(100%); } to { transform: none; } }
   /* Контент не прячется под нижней панелью покупки */
   @media (max-width: 1023px) { body:has(.buybar) { padding-bottom: calc(5rem + var(--safe-b)); } }
+}
+
+@layer components {
+  /* Полоса прокрутки под модальным окном просвечивает цветом страницы: у просмотра фото она должна быть тёмной. */
+  html:has(dialog.lightbox[open]) { background: var(--footer-bg); }
 }

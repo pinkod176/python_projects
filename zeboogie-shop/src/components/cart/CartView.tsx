@@ -52,9 +52,13 @@ export function CartView() {
           <span className="text-ink-soft">Итого</span>
           <span className="font-display text-h3 font-medium tabular-nums">{total ? formatMoney(total) : "—"}</span>
         </div>
-        <Link href="/checkout" aria-disabled={unavailable} className={`btn btn-solid mt-5 w-full ${unavailable ? "pointer-events-none opacity-50" : ""}`}>
-          Оформить заказ <ArrowRight aria-hidden className="size-4" />
-        </Link>
+        {unavailable ? (
+          <button type="button" disabled className="btn btn-solid mt-5 w-full">Оформить заказ</button>
+        ) : (
+          <Link href="/checkout" className="btn btn-solid mt-5 w-full">
+            Оформить заказ <ArrowRight aria-hidden className="size-4" />
+          </Link>
+        )}
         {unavailable && <p role="alert" className="mt-3 text-sm text-danger">Уберите из корзины работы, которых нет в наличии.</p>}
         <p className="mt-4 text-xs leading-relaxed text-ink-soft">Оплата на сайте не принимается: детали вы согласуете с мастерами в личных сообщениях.</p>
       </aside>

@@ -38,5 +38,7 @@ export function justNavigatedBack(): boolean {
   if (typeof window === "undefined") return false;
   if (window.__zbPop !== undefined && performance.now() - window.__zbPop < 4000) return true;
   const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
-  return nav?.type === "back_forward";
+  // Загрузка документа «назад/вперёд» учитываем только в первые секунды жизни страницы: иначе любой обычный заход
+  // в каталог позже в той же вкладке считался бы возвратом.
+  return nav?.type === "back_forward" && performance.now() < 8000;
 }

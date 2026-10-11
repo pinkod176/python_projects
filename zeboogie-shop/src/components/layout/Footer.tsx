@@ -4,7 +4,7 @@ import { getEnv } from "@/lib/config/env";
 import type { Collection, ShopInfo } from "@/lib/types";
 import { Reveal } from "@/components/ui/Reveal";
 
-const link = "u-link inline-flex min-h-10 items-center text-on-accent-soft";
+const link = "u-link inline-flex min-h-11 items-center text-on-accent-soft";
 
 export function Footer({ collections, shop }: { collections: Collection[]; shop: ShopInfo | null }) {
   const { SHOP_EMAIL, SHOP_PHONE } = getEnv();
@@ -18,7 +18,7 @@ export function Footer({ collections, shop }: { collections: Collection[]; shop:
         </div>
         <nav aria-label="Разделы" className="md:col-span-3">
           <p className="text-xs uppercase tracking-[0.18em] text-on-accent-soft">Каталог</p>
-          <ul className="mt-4 space-y-1">
+          <ul className="mt-4 space-y-2">
             <li><Link className={link} href="/catalog">Все работы</Link></li>
             {collections.map((c) => (
               <li key={c.id}><Link className={link} href={`/catalog?category=${c.id}`}>{c.title}</Link></li>
@@ -31,7 +31,7 @@ export function Footer({ collections, shop }: { collections: Collection[]; shop:
         </nav>
         <div className="md:col-span-4">
           <p className="text-xs uppercase tracking-[0.18em] text-on-accent-soft">Связаться</p>
-          <ul className="mt-4 space-y-1">
+          <ul className="mt-4 space-y-2">
             {shop && (
               <>
                 <li><a className={link} href={shop.messageUrl} target="_blank" rel="noopener noreferrer">Написать мастерам ВКонтакте</a></li>

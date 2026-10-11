@@ -61,3 +61,17 @@
   @media (min-width: 1024px) { .checkout-bar { display: none; } }
   @media (max-width: 1023px) { body:has(.checkout-bar) { padding-bottom: calc(5rem + var(--safe-b)); } }
 }
+
+@layer components {
+  /* Название работы в корзине: зона нажатия шире самой строки (без изменения раскладки). */
+  .cart-line a.u-link::before { content: ""; position: absolute; inset: -11px 0; }
+}
+
+@layer components {
+  .steps__btn { position: relative; }
+  button.steps__btn::before { content: ""; position: absolute; inset: -6px; }
+  /* На узких экранах подпись активного шага не должна упираться в соседний кружок: элементы по содержимому, линии тянутся. */
+  .steps__item { flex: 0 1 auto; }
+  .steps__item:not(:last-child) { flex: 1 1 auto; }
+  .steps__item:not(:last-child)::after { min-width: 1rem; }
+}

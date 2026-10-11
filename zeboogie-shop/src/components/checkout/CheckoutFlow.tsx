@@ -36,12 +36,20 @@ export function CheckoutFlow() {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const moved = useRef(false);
+  const focusInvalid = useRef(false);
 
   // После перехода между шагами фокус — на первое поле нового шага (при первом показе фокус не забираем, чтобы не открывать клавиатуру).
   useEffect(() => {
     if (!moved.current) return;
     panel.current?.querySelector<HTMLElement>("input, textarea, button[data-first]")?.focus({ preventScroll: true });
   }, [step]);
+
+  // После неудачной проверки шага фокус — на первое поле с ошибкой (ищем уже после перерисовки: до неё aria-invalid ещё нет).
+  useEffect(() => {
+    if (!focusInvalid.current) return;
+    focusInvalid.current = false;
+    panel.current?.querySelector<HTMLElement>("[aria-invalid='true']")?.focus();
+  }, [errors]);
 
   const unavailable = lines.filter((l) => l.card.availability === "unavailable");
 
@@ -118,7 +126,7 @@ export function CheckoutFlow() {
       const fe = validate(STEPS[step].fields);
       setErrors((cur) => ({ ...cur, ...Object.fromEntries(STEPS[step].fields.map((f) => [f, fe[f]])) }));
       if (Object.keys(fe).length) {
-        panel.current?.querySelector<HTMLElement>("[aria-invalid='true']")?.focus();
+        focusInvalid.current = true;
         return;
       }
       goTo(step + 1);

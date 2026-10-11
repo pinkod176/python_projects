@@ -45,8 +45,14 @@ export function ProductGallery({ images, title, focal }: Props) {
 
   const onKey = (e: KeyboardEvent) => {
     if (count < 2) return;
-    if (e.key === "ArrowLeft") { e.preventDefault(); go(i - 1); }
-    if (e.key === "ArrowRight") { e.preventDefault(); go(i + 1); }
+    const step = e.key === "ArrowLeft" ? -1 : e.key === "ArrowRight" ? 1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    go(i + step);
+    // Фокус идёт за фото: иначе Enter открыл бы просмотр предыдущего кадра, который уже ушёл за край ленты.
+    if ((e.target as HTMLElement).closest(".gallery__photo")) {
+      track.current?.querySelectorAll<HTMLElement>(".gallery__photo")[Math.max(0, Math.min(count - 1, i + step))]?.focus({ preventScroll: true });
+    }
   };
 
   // Пропорции рамки на десктопе — как у обложки (но не уже 0,62 и не шире квадрата).
@@ -121,13 +127,20 @@ export function ProductGallery({ images, title, focal }: Props) {
 /** Крупный просмотр: стрелки, клавиши ← → Esc, клик по фото — увеличение ×1,8 к точке клика. */
 function Lightbox({ images, title, start, onClose, onIndex }: { images: Img[]; title: string; start: number | null; onClose: () => void; onIndex: (n: number) => void }) {
   const dialog = useModalDialog(start !== null, onClose);
-  const [state, setState] = useState<{ from: number | null; i: number }>({ from: null, i: 0 });
+  return (
+    <dialog {...dialog} aria-label={`Фото: ${title}`} className="sheet lightbox" data-side="full">
+      {/* Содержимое монтируется только при открытом окне и с нуля при каждом открытии: номер фото и увеличение не «залипают». */}
+      {start !== null && <LightboxBody key={start} images={images} title={title} initial={start} onClose={onClose} onIndex={onIndex} />}
+    </dialog>
+  );
+}
+
+function LightboxBody({ images, title, initial, onClose, onIndex }: { images: Img[]; title: string; initial: number; onClose: () => void; onIndex: (n: number) => void }) {
+  const [i, setI] = useState(initial);
   const [zoomed, setZoomed] = useState<{ x: number; y: number } | null>(null);
-  // Открытие: берём номер, на который нажали (без эффекта: сверяем «откуда» открыто).
-  const i = start === null ? state.i : state.from === start ? state.i : start;
   const set = (n: number) => {
     const next = Math.max(0, Math.min(images.length - 1, n));
-    setState({ from: start, i: next });
+    setI(next);
     setZoomed(null);
     onIndex(next);
   };
@@ -137,52 +150,46 @@ function Lightbox({ images, title, start, onClose, onIndex }: { images: Img[]; t
     const r = e.currentTarget.getBoundingClientRect();
     setZoomed({ x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 });
   };
+  if (!img) return null;
   return (
-    <dialog
-      {...dialog}
-      aria-label={`Фото: ${title}`}
-      className="sheet lightbox"
-      data-side="full"
+    <div
+      className="contents"
       onKeyDown={(e) => {
         if (e.key === "ArrowLeft") set(i - 1);
         if (e.key === "ArrowRight") set(i + 1);
       }}
     >
-      {start !== null && img && (
+      <button type="button" className="icon-btn lightbox__close" aria-label="Закрыть просмотр" onClick={onClose}>
+        <X aria-hidden className="size-6" strokeWidth={1.5} />
+      </button>
+      <div className="lightbox__stage">
+        <button
+          type="button"
+          className="lightbox__frame"
+          aria-label={zoomed ? "Уменьшить" : "Увеличить"}
+          onClick={toggle}
+          style={{
+            aspectRatio: img.width && img.height ? `${img.width} / ${img.height}` : "4 / 5",
+            maxWidth: img.width ? `min(100%, ${Math.round(img.width * 1.7)}px)` : undefined,
+            transform: zoomed ? "scale(1.8)" : undefined,
+            transformOrigin: zoomed ? `${zoomed.x}% ${zoomed.y}%` : undefined,
+            cursor: zoomed ? "zoom-out" : "zoom-in",
+          }}
+        >
+          <ProductImage src={img.url} alt={`${title} — фото ${i + 1} из ${images.length}`} fit="contain" sizes="100vw" quality={82} eager />
+        </button>
+      </div>
+      {images.length > 1 && (
         <>
-          <button type="button" className="icon-btn lightbox__close" aria-label="Закрыть просмотр" onClick={onClose}>
-            <X aria-hidden className="size-6" strokeWidth={1.5} />
+          <button type="button" className="lightbox__arrow" data-dir="prev" aria-label="Предыдущее фото" disabled={i === 0} onClick={() => set(i - 1)}>
+            <ChevronLeft aria-hidden className="size-6" strokeWidth={1.5} />
           </button>
-          <div className="lightbox__stage">
-            <button
-              type="button"
-              className="lightbox__frame"
-              aria-label={zoomed ? "Уменьшить" : "Увеличить"}
-              onClick={toggle}
-              style={{
-                aspectRatio: img.width && img.height ? `${img.width} / ${img.height}` : "4 / 5",
-                maxWidth: img.width ? `min(100%, ${Math.round(img.width * 1.7)}px)` : undefined,
-                transform: zoomed ? "scale(1.8)" : undefined,
-                transformOrigin: zoomed ? `${zoomed.x}% ${zoomed.y}%` : undefined,
-                cursor: zoomed ? "zoom-out" : "zoom-in",
-              }}
-            >
-              <ProductImage src={img.url} alt={`${title} — фото ${i + 1} из ${images.length}`} fit="contain" sizes="100vw" quality={82} eager />
-            </button>
-          </div>
-          {images.length > 1 && (
-            <>
-              <button type="button" className="lightbox__arrow" data-dir="prev" aria-label="Предыдущее фото" disabled={i === 0} onClick={() => set(i - 1)}>
-                <ChevronLeft aria-hidden className="size-6" strokeWidth={1.5} />
-              </button>
-              <button type="button" className="lightbox__arrow" data-dir="next" aria-label="Следующее фото" disabled={i === images.length - 1} onClick={() => set(i + 1)}>
-                <ChevronRight aria-hidden className="size-6" strokeWidth={1.5} />
-              </button>
-              <span aria-live="polite" className="lightbox__count">{i + 1} / {images.length}</span>
-            </>
-          )}
+          <button type="button" className="lightbox__arrow" data-dir="next" aria-label="Следующее фото" disabled={i === images.length - 1} onClick={() => set(i + 1)}>
+            <ChevronRight aria-hidden className="size-6" strokeWidth={1.5} />
+          </button>
+          <span aria-live="polite" className="lightbox__count">{i + 1} / {images.length}</span>
         </>
       )}
-    </dialog>
+    </div>
   );
 }
