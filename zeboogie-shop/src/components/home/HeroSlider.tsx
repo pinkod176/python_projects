@@ -61,6 +61,9 @@ export function HeroSlider({ slides }: { slides: ProductCard[] }) {
     const el = track.current;
     if (!el || !loop) return;
     const snap = (instant: boolean) => {
+      // Левые двойники скрыты CSS-ом до этого момента (data-ready): так первый кадр с сервера уже показывает «настоящий» первый слайд
+      // по центру, а не двойника, и после гидрации картинка не увеличивается (иначе браузер засчитывает это как новый LCP).
+      el.dataset.ready = "true";
       el.style.scrollSnapType = "none";
       el.scrollLeft = absRef.current * step();
       if (instant) requestAnimationFrame(() => (el.style.scrollSnapType = ""));
@@ -169,6 +172,7 @@ export function HeroSlider({ slides }: { slides: ProductCard[] }) {
               className="hero__slide reveal-load reveal-soft"
               style={{ "--reveal-delay": `${120 + k * 90}ms` } as CSSProperties}
               data-active={i === abs}
+              data-clone={loop && i < base ? "before" : undefined}
               role={real ? "group" : undefined}
               aria-roledescription={real ? "слайд" : undefined}
               aria-label={real ? `${k + 1} из ${n}` : undefined}

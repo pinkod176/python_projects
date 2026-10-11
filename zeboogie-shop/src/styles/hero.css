@@ -51,6 +51,8 @@
     scrollbar-width: none;
   }
   .hero__track::-webkit-scrollbar { display: none; }
+  /* Двойники слева появляются после запуска скрипта (см. HeroSlider). */
+  .hero__track:not([data-ready]) > .hero__slide[data-clone="before"] { display: none; }
   @media (min-width: 1024px) {
     /* По краям экрана дальние фото мягко растворяются */
     .hero__track { mask-image: linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%); }
