@@ -1,0 +1,81 @@
+/*
+ * БАЗА: сброс поверх Tailwind preflight, типографика, фокус, поведение на сенсорных экранах.
+ */
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--text);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-padding-top: calc(var(--header-h) + var(--space-2));
+    /* Полоса прокрутки не «прыгает», когда открывается окно и страница под ним блокируется. */
+    scrollbar-gutter: stable;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+  /* Пока открыто модальное окно (меню, фильтры, корзина), страница под ним не прокручивается. */
+  html:has(dialog[open]) { overflow: hidden; }
+
+  body {
+    font-family: var(--font-ui-stack);
+    font-size: clamp(1rem, 0.95rem + 0.2vw, 1.125rem); /* 16–18 px */
+    line-height: 1.6;
+    background-color: var(--bg);
+    background-image: var(--grain);
+    background-size: 180px 180px;
+    overflow-x: clip;
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* На телефоне нижняя панель быстрых действий не должна закрывать конец страницы. */
+  @media (max-width: 767px) {
+    body:has(.quickbar) { padding-bottom: calc(var(--bar-h) + var(--safe-b)); }
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display-stack);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+  h1, h2, h3, h4, .font-display { font-variant-numeric: lining-nums; font-feature-settings: "lnum" 1; }
+  p { text-wrap: pretty; }
+  ::selection { background: var(--moss); color: var(--on-accent); }
+
+  :focus-visible {
+    outline: 2px solid var(--moss);
+    outline-offset: 3px;
+  }
+  .on-dark :focus-visible { outline-color: var(--on-accent); }
+
+  /*
+   * Сенсорные экраны: нажатие срабатывает сразу, без задержки и без зума по двойному тапу
+   * (touch-action: manipulation), серой вспышки при тапе нет — вместо неё у каждой кнопки свой :active.
+   */
+  a, button, summary, label, select, input, textarea, [role="button"], [role="tab"], [role="switch"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
+  img { max-width: 100%; }
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
+  /* iOS увеличивает страницу при фокусе на поле с шрифтом < 16 px — не допускаем. */
+  input, select, textarea { font-size: max(1rem, 16px); }
+
+  fieldset { min-width: 0; min-inline-size: 0; }
+  /*
+   * Скрытые radio/checkbox (.sr-only) абсолютно позиционированы. Если у ближайшего родителя нет position,
+   * они «приклеиваются» к странице и торчат за краем прокручиваемого ряда «таблеток»: документ становится шире экрана,
+   * мобильный браузер «отдаляет» страницу, всё становится мелким и тапы мажут. Привязываем их к своей подписи.
+   */
+  label:has(> .sr-only) { position: relative; }
+
+  /* Диалоги: свой вид задают компоненты, здесь только сброс нативных отступов. */
+  dialog { max-width: none; max-height: none; }
+  dialog::backdrop { background: var(--scrim); }
+}

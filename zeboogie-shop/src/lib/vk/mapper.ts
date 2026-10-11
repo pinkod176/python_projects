@@ -1,4 +1,5 @@
-import { makeSlug } from "@/lib/format";
+import { applyCover, pickHover, type CurationMap } from "@/lib/curation";
+import { deriveFormat, makeSlug } from "@/lib/format";
 import type { Collection, Product, ProductAttribute, ProductImage, ProductOption, ShopInfo } from "@/lib/types";
 import type { VkAlbum, VkGroup, VkMarketItem } from "./schemas";
 
@@ -78,6 +79,8 @@ export type MapContext = {
   /** Если albums_ids в товарах не пришли, членство восстанавливается запросами по подборкам. */
   albumMembership?: Map<number, number[]>;
   nowIso: string;
+  /** Слой витрины (обложки, hero, метки) по id товара VK. */
+  curation?: CurationMap;
 };
 
 export function mapItem(item: VkMarketItem, ctx: MapContext, previous?: Product): Product {
@@ -89,7 +92,13 @@ export function mapItem(item: VkMarketItem, ctx: MapContext, previous?: Product)
   if (!categories.length && item.category?.name) {
     categories = [{ id: `c${item.category.id ?? item.category.name}`, title: item.category.name }];
   }
-    return {
+  const cur = ctx.curation?.[String(item.id)];
+  const original = mapImages(item);
+  const images = applyCover(original, cur?.cover);
+  const attributes = mapAttributes(item);
+  const format = deriveFormat(item.title);
+  if (format && !attributes.some((a) => a.name === "Формат")) attributes.push({ name: "Формат", value: format });
+  return {
     vkId,
     itemId: item.id,
     ownerId: item.owner_id,
@@ -98,14 +107,24 @@ export function mapItem(item: VkMarketItem, ctx: MapContext, previous?: Product)
     title: item.title.trim(),
     description: (item.description ?? "").trim(),
     ...mapPrice(item),
-    images: mapImages(item),
+    // Обложка из слоя витрины ставится первой; остальные фото сохраняют исходный порядок.
+    images,
     categories,
-    attributes: mapAttributes(item),
+    attributes,
     options: mapOptions(item),
     // Наличие показываем только если VK его передал.
     availability: item.availability === undefined ? "unknown" : item.availability === 0 ? "in_stock" : "unavailable",
     vkUrl: `https://${ctx.domain}/market${item.owner_id}?w=product${item.owner_id}_${item.id}`,
     publishedAt: item.date ?? 0,
+    focalPoint: cur?.focalPoint,
+    featured: cur?.featured || undefined,
+    featuredOrder: cur?.featuredOrder,
+    collectionCover: cur?.collectionCover || undefined,
+    badges: cur?.badges ?? [],
+    popularity: item.likes?.count,
+    hoverImage: pickHover(original, images, cur?.hover),
+    interior: cur?.interior
+      ?.flatMap((i) => (original[i.photo - 1] ? [{ url: original[i.photo - 1].url, note: i.note }] : [])),
     status: "active",
     firstSeenAt: previous?.firstSeenAt ?? ctx.nowIso,
     updatedAt: ctx.nowIso,
@@ -117,11 +136,17 @@ export function mapCollections(albums: VkAlbum[], products: Product[]): Collecti
     .map((a) => {
       const id = `a${a.id}`;
       const members = products.filter((p) => p.status === "active" && p.categories.some((c) => c.id === id));
+      // Обложка подборки: работа, помеченная мастерской (collectionCover) → фото подборки из VK → первая работа.
+      const marked = members.find((m) => m.collectionCover && m.images[0]);
+      const fallback = members.find((m) => m.images[0]);
+      const vkPhoto = bestSize(a.photo?.sizes)?.url;
+      const pick = marked ?? (vkPhoto ? undefined : fallback);
       return {
         id,
         title: a.title,
         count: members.length,
-        image: bestSize(a.photo?.sizes)?.url ?? members.find((m) => m.images[0])?.images[0]?.url,
+        image: pick ? pick.images[0].url : (vkPhoto ?? fallback?.images[0]?.url),
+        imageFocal: pick?.focalPoint,
       };
     })
     .filter((c) => c.count > 0);

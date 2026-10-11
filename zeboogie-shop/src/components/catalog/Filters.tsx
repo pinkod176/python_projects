@@ -2,89 +2,78 @@
 
 import type { Facets } from "@/lib/catalog/query";
 import type { UiParams } from "@/lib/catalog/params";
-import { formatMoney } from "@/lib/format";
+import { PriceRange } from "./PriceRange";
 
-type Props = { facets: Facets; params: UiParams; onChange: (patch: Partial<UiParams>) => void; onReset: () => void; dirty: boolean };
+type Props = {
+  facets: Facets;
+  params: UiParams;
+  onChange: (patch: Partial<UiParams>) => void;
+  /** Показывать группу «Подборка» (в шторке на телефоне плашек-подборок над сеткой не видно). */
+  withCategory?: boolean;
+};
 
-const symbol = (c: string) => ({ RUB: "₽", RUR: "₽", USD: "$", EUR: "€" })[c.toUpperCase()] ?? c;
+const group = "min-w-0 border-0 p-0";
 
-const check = "size-[1.15rem] shrink-0 accent-moss";
-const row = "flex min-h-11 cursor-pointer items-center justify-between gap-3 transition-colors hover:text-wood";
-
-/** Панель фильтров (цена, наличие, характеристики). Показывает только те группы, для которых в данных есть выбор. */
-export function Filters({ facets, params, onChange, onReset, dirty }: Props) {
+/**
+ * Группы фильтров: подборка, цена, формат (размер), другие характеристики, наличие.
+ * Показываются только те группы, для которых в данных есть из чего выбирать: например, «Порода дерева» появится,
+ * когда у работ в сообществе будет такая характеристика. Изменения применяются сразу.
+ */
+export function Filters({ facets, params, onChange, withCategory }: Props) {
   const toggleAttr = (pair: string) =>
     onChange({ attrs: params.attrs.includes(pair) ? params.attrs.filter((a) => a !== pair) : [...params.attrs, pair] });
 
   return (
     <div className="space-y-8">
-      {facets.price && (
-        <fieldset>
-          <legend className="eyebrow mb-3">Цена, {symbol(facets.price.currency)}</legend>
-          <div className="flex items-center gap-2">
-            <label className="min-w-0 flex-1">
-              <span className="sr-only">Цена от</span>
-              <input
-                inputMode="numeric"
-                className="field !min-h-12"
-                placeholder="от"
-                value={params.min}
-                onChange={(e) => onChange({ min: e.target.value.replace(/[^\d]/g, "") })}
-              />
-            </label>
-            <span aria-hidden className="text-copper">—</span>
-            <label className="min-w-0 flex-1">
-              <span className="sr-only">Цена до</span>
-              <input
-                inputMode="numeric"
-                className="field !min-h-12"
-                placeholder="до"
-                value={params.max}
-                onChange={(e) => onChange({ max: e.target.value.replace(/[^\d]/g, "") })}
-              />
-            </label>
+      {withCategory && facets.categories.length > 0 && (
+        <fieldset className={group}>
+          <legend className="eyebrow mb-3">Подборка</legend>
+          <div className="flex flex-wrap gap-2">
+            {[{ id: "", title: "Все работы" }, ...facets.categories].map((c) => (
+              <label key={c.id || "all"}>
+                <input type="radio" name="filter-category" className="sr-only" checked={params.category === c.id} onChange={() => onChange({ category: c.id })} />
+                <span className="chip">{c.title}</span>
+              </label>
+            ))}
           </div>
-          <p className="mt-2 text-xs text-ink-soft">
-            В каталоге: {formatMoney({ amount: facets.price.min, currency: facets.price.currency })} — {formatMoney({ amount: facets.price.max, currency: facets.price.currency })}
-          </p>
         </fieldset>
       )}
 
-      {facets.hasAvailabilityData && (
-        <label className={row}>
-          <span className="flex items-center gap-3">
-            <input type="checkbox" className={check} checked={params.inStock} onChange={(e) => onChange({ inStock: e.target.checked })} />
-            Только в наличии
-          </span>
-        </label>
+      {facets.price && facets.price.points.length > 1 && (
+        <fieldset className={group}>
+          <legend className="eyebrow mb-2">Цена, ₽</legend>
+          <PriceRange price={facets.price} min={params.min} max={params.max} onChange={(next) => onChange(next)} />
+        </fieldset>
       )}
 
       {facets.attributes.map((a) => (
-        <fieldset key={a.name}>
-          <legend className="eyebrow mb-3">{a.name}</legend>
-          <ul>
+        <fieldset key={a.name} className={group}>
+          <legend className="eyebrow mb-3">{a.name === "Формат" ? "Формат (размер)" : a.name}</legend>
+          <div className="flex flex-wrap gap-2">
             {a.values.map((v) => {
               const pair = `${a.name}:${v.value}`;
               return (
-                <li key={pair}>
-                  <label className={row}>
-                    <span className="flex items-center gap-3">
-                      <input type="checkbox" className={check} checked={params.attrs.includes(pair)} onChange={() => toggleAttr(pair)} />
-                      {v.value}
-                    </span>
-                    <span className="text-xs text-ink-soft">{v.count}</span>
-                  </label>
-                </li>
+                <label key={pair}>
+                  <input type="checkbox" className="sr-only" checked={params.attrs.includes(pair)} onChange={() => toggleAttr(pair)} />
+                  <span className="chip">
+                    {v.value}
+                    <small>{v.count}</small>
+                  </span>
+                </label>
               );
             })}
-          </ul>
+          </div>
         </fieldset>
       ))}
 
-      {dirty && (
-        <button type="button" onClick={onReset} className="u-link min-h-11 text-sm">
-          Сбросить фильтры
-        </button>
+      {facets.hasAvailabilityData && (
+        <fieldset className={group}>
+          <legend className="eyebrow mb-3">Наличие</legend>
+          <label className="inline-flex min-h-11 cursor-pointer items-center gap-3">
+            <input type="checkbox" className="sr-only" checked={params.inStock} onChange={(e) => onChange({ inStock: e.target.checked })} />
+            <span className="chip">Только в наличии</span>
+          </label>
+        </fieldset>
       )}
     </div>
   );

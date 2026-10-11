@@ -1,5 +1,8 @@
 import "server-only";
+import curationDemo from "@/content/curation.demo.json";
+import curationLive from "@/content/curation.live.json";
 import { getEnv } from "@/lib/config/env";
+import { cleanCuration } from "@/lib/curation";
 import { logger } from "@/lib/log";
 import type { Catalog, Product, SyncResult } from "@/lib/types";
 import { mapCollections, mapItem, mapShop } from "@/lib/vk/mapper";
@@ -36,7 +39,9 @@ async function doSync(): Promise<SyncResult> {
     const prevByKey = new Map((previous?.products ?? []).map((p) => [p.vkId, p]));
     const domain = getEnv().VK_PUBLIC_DOMAIN;
     const albums = new Map(raw.albums.map((a) => [a.id, a.title]));
-    const ctx = { domain, albums, albumMembership: raw.albumMembership, nowIso: startedAt };
+    // Слой витрины: для демо и реального сообщества — разные файлы, они не смешиваются.
+    const curation = cleanCuration(source.kind === "demo" ? curationDemo : curationLive);
+    const ctx = { domain, albums, albumMembership: raw.albumMembership, nowIso: startedAt, curation };
 
     const fresh: Product[] = raw.items
       // Товары, удалённые на стороне VK (availability=1), не публикуем.

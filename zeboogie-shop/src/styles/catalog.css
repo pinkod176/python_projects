@@ -1,0 +1,113 @@
+/*
+ * КАТАЛОГ: компактная шапка страницы, «таблетки» подборок, панель инструментов (счётчик, фильтры, сортировка, вид сетки),
+ * боковая панель фильтров на ноутбуке, шторка фильтров на телефоне.
+ */
+@layer components {
+  .page-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem var(--space-3); margin-block: var(--space-2) var(--space-3); }
+  .page-title {
+    font-size: clamp(2rem, 1.3rem + 2.2vw, 3.25rem);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  .pills {
+    position: relative; /* без этого скрытые radio (.sr-only, position: absolute) торчат за краем экрана и растягивают страницу */
+    display: flex;
+    gap: var(--hit-gap);
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 2px var(--gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
+  }
+  .pills > label { scroll-snap-align: start; }
+  @media (min-width: 768px) { .pills { margin-inline: 0; padding-inline: 0; flex-wrap: wrap; overflow: visible; } }
+
+  /*
+   * Верх каталога одной сеткой: заголовок со счётчиком, «таблетки» подборок и инструменты (фильтры, сортировка, вид).
+   * Телефон: заголовок | вид, подборки, фильтры | сортировка. Планшет: инструменты справа под подборками.
+   * Ноутбук ≥ 1200: подборки и инструменты в одной строке — первый ряд карточек виден целиком даже на 1366×768.
+   */
+  .catalog-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    grid-template-areas: "head view" "pills pills" "filters sort";
+    align-items: center;
+    gap: var(--hit-gap) var(--space-2);
+  }
+  .catalog-head { grid-area: head; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-2); }
+  .catalog-pills { grid-area: pills; min-width: 0; margin-block: 0.25rem; }
+  .seg { justify-self: end; }
+  @media (min-width: 640px) {
+    .catalog-top { grid-template-columns: minmax(0, 1fr) auto auto auto; grid-template-areas: "head head head head" "pills pills pills pills" ". filters sort view"; }
+  }
+  @media (min-width: 1200px) {
+    .catalog-top { grid-template-areas: "head head head head" "pills filters sort view"; column-gap: var(--space-2); }
+    .catalog-pills { margin-block: 0; }
+  }
+  .catalog-count { font-size: 0.9375rem; color: var(--text-soft); }
+  .catalog-count strong { color: var(--text); font-weight: 500; }
+  .catalog-filters-btn { grid-area: filters; position: relative; }
+  .catalog-filters-btn .badge { position: static; animation: none; margin-left: 0.15rem; }
+  .catalog-sort { grid-area: sort; position: relative; display: block; }
+  .catalog-sort select {
+    width: 100%;
+    min-height: var(--hit);
+    padding: 0 2.25rem 0 0.9rem;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r);
+    background: transparent;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color var(--dur-hover) var(--ease), background-color var(--dur-hover) var(--ease);
+  }
+  .catalog-sort select:active { background: var(--surface-deep); }
+  @media (hover: hover) and (pointer: fine) { .catalog-sort select:hover { border-color: var(--moss); background: var(--surface); } }
+  .catalog-sort svg { position: absolute; right: 0.75rem; top: 50%; translate: 0 -50%; pointer-events: none; color: var(--text-soft); }
+
+  /* Переключатель вида сетки */
+  .seg { grid-area: view; display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--border-strong); border-radius: var(--r); }
+  .seg button {
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    border-radius: calc(var(--r) - 2px);
+    color: var(--text-soft);
+    transition: background-color var(--dur-hover) var(--ease), color var(--dur-hover) var(--ease);
+  }
+  .seg button[aria-pressed="true"] { background: var(--moss); color: var(--on-accent); }
+  .seg button:not([aria-pressed="true"]):active { background: var(--surface-deep); }
+  @media (hover: hover) and (pointer: fine) { .seg button:not([aria-pressed="true"]):hover { background: var(--surface); color: var(--text); } }
+
+  /* Основная раскладка: боковая панель фильтров (только ноутбук ≥ 1200 px) + сетка */
+  .catalog { display: block; }
+  .catalog__side { display: none; }
+  @media (min-width: 1200px) {
+    .catalog[data-sidebar="open"] { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 0 var(--space-5); }
+    .catalog[data-sidebar="open"] .catalog__side { display: block; }
+  }
+  .catalog__side-inner {
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-3));
+    max-height: calc(100dvh - var(--header-h) - var(--space-4));
+    overflow-y: auto;
+    padding: 0.25rem 0.5rem 1rem 0.25rem;
+    scrollbar-width: thin;
+    animation: panel-in 420ms var(--ease) both;
+  }
+
+  /* Прогресс «Показано 12 из 28» */
+  .more-progress { width: 12rem; height: 2px; overflow: hidden; border-radius: 2px; background: var(--border); }
+  .more-progress > span { display: block; height: 100%; background: var(--copper-deep); transform-origin: left center; transition: transform 600ms var(--ease); }
+
+  /* Шторка: «ручка» сверху и ограничение ширины на планшете */
+  .sheet__grip { flex: none; width: 2.5rem; height: 4px; margin: 0.6rem auto 0; border-radius: 4px; background: var(--border-strong); opacity: 0.5; }
+  @media (min-width: 768px) {
+    .sheet[data-side="bottom"] { max-width: 40rem; margin-inline: auto; }
+  }
+}

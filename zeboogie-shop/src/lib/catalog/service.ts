@@ -63,6 +63,7 @@ async function demoFilesChangedSince(iso: string): Promise<boolean> {
   const since = new Date(iso).getTime();
   const paths = [
     path.join(/* turbopackIgnore: true */ base, "src/lib/vk/demo/market.json"),
+    path.join(/* turbopackIgnore: true */ base, "src/content/curation.demo.json"),
     path.join(/* turbopackIgnore: true */ base, "public/demo/products"),
   ];
   const times = await Promise.all(paths.map((p) => stat(p).then((s) => s.mtimeMs).catch(() => 0)));

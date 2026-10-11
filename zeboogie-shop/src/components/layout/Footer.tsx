@@ -9,7 +9,7 @@ const link = "u-link inline-flex min-h-10 items-center text-on-accent-soft";
 export function Footer({ collections, shop }: { collections: Collection[]; shop: ShopInfo | null }) {
   const { SHOP_EMAIL, SHOP_PHONE } = getEnv();
   return (
-    <footer className="footer mt-24 bg-footer text-on-accent md:mt-32">
+    <footer className="footer on-dark mt-24 bg-footer text-on-accent md:mt-32">
       <Reveal className="container-x grid gap-16 py-16 md:grid-cols-12 md:py-24">
         <div className="md:col-span-5">
           <p className="font-display text-5xl font-light tracking-[-0.02em] md:text-6xl">{brand.name}</p>
@@ -23,7 +23,9 @@ export function Footer({ collections, shop }: { collections: Collection[]; shop:
             {collections.map((c) => (
               <li key={c.id}><Link className={link} href={`/catalog?category=${c.id}`}>{c.title}</Link></li>
             ))}
-            <li><Link className={link} href="/about">О мастерской</Link></li>
+            {brand.nav.info.map((i) => (
+              <li key={i.href}><Link className={link} href={i.href}>{i.label}</Link></li>
+            ))}
             <li><Link className={link} href="/favorites">Избранное</Link></li>
           </ul>
         </nav>

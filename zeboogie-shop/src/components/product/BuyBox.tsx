@@ -2,13 +2,21 @@
 
 import { useRouter } from "next/navigation";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import type { ProductCard, ProductOption } from "@/lib/types";
 import { useCart } from "@/components/cart/CartProvider";
 import { FavoriteButton } from "./FavoriteButton";
 
 type Props = { card: ProductCard; options: ProductOption[]; vkUrl: string };
 
+const noopSubscribe = () => () => {};
+
+/**
+ * Покупка: выбор варианта (если есть), количество, «В корзину», избранное.
+ * Десктоп — ряд кнопок в колонке справа. Телефон и планшет — закреплённая нижняя панель «♡ + В корзину» в зоне большого пальца;
+ * она выносится в body (portal), чтобы ни transform анимаций появления, ни родительские контейнеры не ломали position: fixed.
+ */
 export function BuyBox({ card, options, vkUrl }: Props) {
   const router = useRouter();
   const { add } = useCart();
@@ -17,6 +25,7 @@ export function BuyBox({ card, options, vkUrl }: Props) {
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
   const timer = useRef<number | undefined>(undefined);
+  const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const unavailable = card.availability === "unavailable";
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -42,14 +51,29 @@ export function BuyBox({ card, options, vkUrl }: Props) {
     timer.current = window.setTimeout(() => setDone(false), 2400);
   }
 
-  const step = "grid size-[3.25rem] place-items-center transition-colors hover:bg-paper-2 disabled:opacity-40";
+  const addButton = (extra: string) => (
+    <button type="button" disabled={unavailable} data-done={done} className={`btn btn-solid btn-confirm ${extra}`} onClick={addToCart}>
+      <span className="btn-confirm__idle">
+        {unavailable ? (
+          "Нет в наличии"
+        ) : (
+          <>
+            <ShoppingBag aria-hidden className="size-4" strokeWidth={1.75} /> В корзину
+          </>
+        )}
+      </span>
+      <span className="btn-confirm__done" aria-hidden>
+        <Check className="size-4" strokeWidth={2} /> Добавлено
+      </span>
+    </button>
+  );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {options.map((o) => (
-        <fieldset key={o.name}>
+        <fieldset key={o.name} className="min-w-0 border-0 p-0">
           <legend className="eyebrow mb-3">{o.name}</legend>
-          <div className="relative flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             {o.values.map((v) => (
               <label key={v}>
                 <input
@@ -70,38 +94,25 @@ export function BuyBox({ card, options, vkUrl }: Props) {
       ))}
       {error && <p role="alert" className="field-error text-sm text-danger">{error}</p>}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center rounded-md border border-field" role="group" aria-label="Количество">
-          <button type="button" className={`${step} rounded-l-md`} aria-label="Уменьшить количество" disabled={qty <= 1} onClick={() => setQty((q) => q - 1)}>
+      <div className="buy__row">
+        <div className="qty" role="group" aria-label="Количество">
+          <button type="button" aria-label="Уменьшить количество" disabled={qty <= 1} onClick={() => setQty((q) => q - 1)}>
             <Minus aria-hidden className="size-4" />
           </button>
-          <output aria-live="polite" className="min-w-10 text-center tabular-nums">{qty}</output>
-          <button type="button" className={`${step} rounded-r-md`} aria-label="Увеличить количество" disabled={qty >= 99} onClick={() => setQty((q) => q + 1)}>
+          <output aria-live="polite">{qty}</output>
+          <button type="button" aria-label="Увеличить количество" disabled={qty >= 99} onClick={() => setQty((q) => q + 1)}>
             <Plus aria-hidden className="size-4" />
           </button>
         </div>
-        <button type="button" disabled={unavailable} data-done={done} className="btn btn-solid btn-confirm min-w-[10rem] flex-1" onClick={addToCart}>
-          <span className="btn-confirm__idle">
-            {unavailable ? (
-              "Нет в наличии"
-            ) : (
-              <>
-                <ShoppingBag aria-hidden className="size-4" strokeWidth={1.75} /> В корзину
-              </>
-            )}
-          </span>
-          <span className="btn-confirm__done" aria-hidden>
-            <Check className="size-4" strokeWidth={2} /> Добавлено
-          </span>
-        </button>
-        <span role="status" className="sr-only">{done ? "Товар добавлен в корзину" : ""}</span>
-        <FavoriteButton card={card} className="!size-[3.25rem] border border-field" />
+        <span className="buy__desktop-add">{addButton("w-full")}</span>
+        <span className="buy__desktop-fav"><FavoriteButton card={card} className="!size-[3.25rem] border border-field" /></span>
       </div>
+      <span role="status" className="sr-only">{done ? "Товар добавлен в корзину" : ""}</span>
 
       {!unavailable && (
         <button
           type="button"
-          className="btn btn-ghost w-full"
+          className="btn btn-ghost btn-sm w-full"
           onClick={() => {
             const c = withVariant();
             if (c) {
@@ -117,6 +128,18 @@ export function BuyBox({ card, options, vkUrl }: Props) {
         <p>Заказ отправляется мастерам сообщением во ВКонтакте.</p>
         <a href={vkUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex min-h-11 items-center underline decoration-copper/70 underline-offset-[5px] transition-colors hover:text-wood hover:decoration-wood">Открыть товар в сообществе</a>
       </div>
+
+      {mounted &&
+        createPortal(
+          <div className="buybar" role="region" aria-label="Покупка">
+            {error && <p role="alert" className="field-error buybar__error">{error}</p>}
+            <div className="buybar__row">
+              <FavoriteButton card={card} className="!size-[3.25rem] border border-field" />
+              {addButton("flex-1")}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

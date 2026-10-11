@@ -1,0 +1,1 @@
+{"_readme": "Слой витрины поверх данных VK (демо-режим). Ключ — id товара VK. Поля: cover, hover, focalPoint, featured, featuredOrder, badges, reshoot, interior. Исходные фото и market.json не меняются."}

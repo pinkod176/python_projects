@@ -1,32 +1,43 @@
 "use client";
 
-import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
+import { ChevronDown, Grid2x2, SlidersHorizontal, Square } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DEFAULT_PARAMS, toApiQuery, toPageQuery, type UiParams } from "@/lib/catalog/params";
 import type { CatalogResult } from "@/lib/catalog/query";
+import { loadCatalogRestore, justNavigatedBack, saveCatalogRestore } from "@/lib/catalog/restore";
 import { plural } from "@/lib/format";
+import { usePref, setPref } from "@/lib/use-pref";
+import { useMedia } from "@/lib/use-media";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/ProductGrid";
+import { ActiveFilters } from "./ActiveFilters";
 import { CategoryPills } from "./CategoryPills";
+import { FilterSheet } from "./FilterSheet";
 import { Filters } from "./Filters";
 
 const PAGE_SIZE = 12;
-const SORT_LABELS: Record<UiParams["sort"], string> = {
-  new: "Сначала новые",
-  "price-asc": "Сначала дешевле",
-  "price-desc": "Сначала дороже",
-  name: "По названию",
-};
-
 type Status = "idle" | "loading" | "more" | "error";
+
+const sortLabels = (hasPopularity: boolean, current: UiParams["sort"]): [UiParams["sort"], string][] => [
+  ["new", "Сначала новые"],
+  ["price-asc", "Цена по возрастанию"],
+  ["price-desc", "Цена по убыванию"],
+  // Без лайков VK это «выбор мастерской» (работы из hero, затем новые): называем честно.
+  ["popular", hasPopularity ? "Популярные" : "Выбор мастерской"],
+  ...(current === "name" ? ([["name", "По названию"]] as [UiParams["sort"], string][]) : []),
+];
 
 export function CatalogBrowser({ initial, initialParams }: { initial: CatalogResult; initialParams: UiParams }) {
   const [params, setParams] = useState(initialParams);
   const [data, setData] = useState(initial);
   const [status, setStatus] = useState<Status>("idle");
-  const [panelOpen, setPanelOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const view = usePref("zb:view", "grid") === "large" ? "large" : "grid";
+  const sidebarPref = usePref("zb:sidebar", "open") !== "closed";
+  const isWide = useMedia("(min-width: 1200px)");
   const reqId = useRef(0);
   const first = useRef(true);
+  const live = useRef({ key: toPageQuery(initialParams), pages: initial.page });
 
   const fetchPage = useCallback(async (p: UiParams, page: number, append: boolean) => {
     const id = ++reqId.current;
@@ -43,7 +54,7 @@ export function CatalogBrowser({ initial, initialParams }: { initial: CatalogRes
     }
   }, []);
 
-  // Любое изменение фильтров: обновляем адрес (без перезагрузки) и запрашиваем данные. Ввод цены/поиска — с задержкой.
+  // Любое изменение фильтров: обновляем адрес (без перезагрузки) и запрашиваем данные. Ввод цены — с задержкой.
   useEffect(() => {
     if (first.current) {
       first.current = false;
@@ -51,72 +62,138 @@ export function CatalogBrowser({ initial, initialParams }: { initial: CatalogRes
     }
     const t = setTimeout(() => {
       const qs = toPageQuery(params);
-      window.history.replaceState(null, "", qs ? `/catalog?${qs}` : "/catalog");
+      live.current = { key: qs, pages: 1 };
+      window.history.replaceState(window.history.state, "", qs ? `/catalog?${qs}` : "/catalog");
       void fetchPage(params, 1, false);
     }, 250);
     return () => clearTimeout(t);
   }, [params, fetchPage]);
 
+  useEffect(() => {
+    live.current.pages = data.page;
+  }, [data.page]);
+
+  // Возврат из карточки товара: дозагружаем те же страницы и возвращаем прокрутку; пока листаем — помним, где мы.
+  useEffect(() => {
+    let timer = 0;
+    const save = () => saveCatalogRestore({ key: live.current.key, pages: live.current.pages, y: window.scrollY });
+    const onScroll = () => {
+      if (!timer) timer = window.setTimeout(() => { timer = 0; save(); }, 250);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    let cancelled = false;
+    const saved = justNavigatedBack() ? loadCatalogRestore(toPageQuery(initialParams)) : null;
+    if (saved && (saved.pages > 1 || saved.y > 40)) {
+      void (async () => {
+        try {
+          const pages = Math.min(saved.pages, 10);
+          const more = await Promise.all(
+            Array.from({ length: pages - 1 }, (_, i) =>
+              fetch(`/api/catalog?${toApiQuery(initialParams, i + 2, PAGE_SIZE)}`).then((r) => (r.ok ? (r.json() as Promise<CatalogResult>) : Promise.reject(new Error(String(r.status))))),
+            ),
+          );
+          if (cancelled) return;
+          if (more.length) setData((prev) => ({ ...prev, page: pages, items: [...prev.items, ...more.flatMap((m) => m.items)] }));
+        } catch {
+          /* вернём только прокрутку */
+        }
+        if (!cancelled) requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo({ top: saved.y, behavior: "instant" })));
+      })();
+    }
+    return () => {
+      cancelled = true;
+      window.removeEventListener("scroll", onScroll);
+      if (timer) window.clearTimeout(timer);
+    };
+    // Выполняется один раз при открытии каталога.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const patch = (p: Partial<UiParams>) => setParams((cur) => ({ ...cur, ...p }));
-  const dirty = JSON.stringify({ ...params, sort: "new", q: "", category: "" }) !== JSON.stringify({ ...DEFAULT_PARAMS });
-  const reset = () => setParams((cur) => ({ ...DEFAULT_PARAMS, q: cur.q, sort: cur.sort, category: cur.category }));
+  const resetAll = () => setParams((cur) => ({ ...DEFAULT_PARAMS, sort: cur.sort }));
   const loading = status === "loading";
   const hasMore = data.items.length < data.total;
+  const f = data.facets;
+  const hasFilters = Boolean((f.price && f.price.points.length > 1) || f.hasAvailabilityData || f.attributes.length > 0);
+  const activeCount = (params.category ? 1 : 0) + (params.min || params.max ? 1 : 0) + (params.inStock ? 1 : 0) + params.attrs.length + (params.q.trim() ? 1 : 0);
+  const sidebarOpen = hasFilters && sidebarPref;
 
-  const filters = <Filters facets={data.facets} params={params} onChange={patch} onReset={reset} dirty={dirty} />;
-  const hasFilters = Boolean(data.facets.price) || data.facets.hasAvailabilityData || data.facets.attributes.length > 0;
+  const onFiltersClick = () => {
+    if (isWide) setPref("zb:sidebar", sidebarPref ? "closed" : "open");
+    else setSheetOpen(true);
+  };
+
+  const title = f.categories.find((c) => c.id === params.category)?.title ?? "Каталог";
 
   return (
     <div>
-      <CategoryPills categories={data.facets.categories} value={params.category} onChange={(category) => patch({ category })} />
-
-      <div className={`mt-8 grid gap-10 ${hasFilters ? "lg:grid-cols-[13rem_1fr] lg:gap-12" : ""}`}>
-        {/* Десктоп: боковая панель */}
-        {hasFilters && (
-          <aside aria-label="Фильтры" className="hidden lg:block">
-            <div className="sticky top-[calc(var(--header-h)+var(--space-3))]">{filters}</div>
-          </aside>
-        )}
-
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="relative w-full min-w-0 sm:w-auto sm:max-w-sm sm:flex-1">
-              <span className="sr-only">Поиск по каталогу</span>
-              <Search aria-hidden className="pointer-events-none absolute left-4 top-1/2 size-[1.15rem] -translate-y-1/2 text-ink-soft" strokeWidth={1.5} />
-              <input
-                type="search"
-                value={params.q}
-                onChange={(e) => patch({ q: e.target.value })}
-                placeholder="Поиск по названию и описанию"
-                className="field !min-h-12 pl-11"
-              />
-            </label>
-            {hasFilters && (
-              <button type="button" className="btn btn-ghost !min-h-12 flex-1 sm:flex-none lg:hidden" onClick={() => setPanelOpen(true)}>
-                <SlidersHorizontal aria-hidden className="size-4" /> Фильтры{dirty ? " •" : ""}
-              </button>
-            )}
-            <label className="relative flex items-center gap-3 text-sm sm:ml-auto">
-              <span className="hidden text-ink-soft sm:inline">Сортировка</span>
-              <select
-                aria-label="Сортировка"
-                value={params.sort}
-                onChange={(e) => patch({ sort: e.target.value as UiParams["sort"] })}
-                className="field !min-h-12 !w-auto cursor-pointer appearance-none !pr-10"
-              >
-                {Object.entries(SORT_LABELS).map(([v, l]) => (
-                  <option key={v} value={v}>{l}</option>
-                ))}
-              </select>
-              <ChevronDown aria-hidden className="pointer-events-none absolute right-3 size-4 text-ink-soft" strokeWidth={1.5} />
-            </label>
-          </div>
-
-          <p className="mt-6 text-sm text-ink-soft" aria-live="polite">
-            {loading ? "Обновляем…" : `${data.total} ${plural(data.total, ["работа", "работы", "работ"])}`}
+      <div className="catalog-top">
+        <header className="catalog-head">
+          <h1 className="page-title">{title}</h1>
+          <p className="catalog-count" aria-live="polite">
+            {loading ? "Обновляем…" : <><strong>{data.total}</strong> {plural(data.total, ["работа", "работы", "работ"])}</>}
           </p>
+        </header>
+        <div className="catalog-pills">
+          <CategoryPills categories={f.categories} value={params.category} onChange={(category) => patch({ category })} />
+        </div>
+        {(hasFilters || f.categories.length > 0) && (
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm catalog-filters-btn"
+            aria-expanded={isWide ? sidebarOpen : sheetOpen}
+            aria-controls={isWide ? "catalog-filters" : undefined}
+            aria-haspopup={isWide ? undefined : "dialog"}
+            onClick={onFiltersClick}
+          >
+            <SlidersHorizontal aria-hidden className="size-4" strokeWidth={1.75} />
+            Фильтры
+            {activeCount > 0 && <span className="badge">{activeCount}</span>}
+          </button>
+        )}
+        <label className="catalog-sort">
+          <span className="sr-only">Сортировка</span>
+          <select value={params.sort} onChange={(e) => patch({ sort: e.target.value as UiParams["sort"] })}>
+            {sortLabels(f.hasPopularity, params.sort).map(([v, l]) => (
+              <option key={v} value={v}>{l}</option>
+            ))}
+          </select>
+          <ChevronDown aria-hidden className="size-4" strokeWidth={1.5} />
+        </label>
+        <div className="seg" role="group" aria-label="Вид сетки">
+          <button type="button" aria-pressed={view === "grid"} aria-label="Обычные карточки" onClick={() => setPref("zb:view", "grid")}>
+            <Grid2x2 aria-hidden className="size-[1.15rem]" strokeWidth={1.5} />
+          </button>
+          <button type="button" aria-pressed={view === "large"} aria-label="Крупные карточки" onClick={() => setPref("zb:view", "large")}>
+            <Square aria-hidden className="size-[1.15rem]" strokeWidth={1.5} />
+          </button>
+        </div>
+      </div>
 
-          <div className={`mt-6 transition-opacity duration-300 ${loading ? "opacity-50" : ""}`} aria-busy={loading}>
+      {activeCount > 0 && (
+        <div className="mt-3">
+          <ActiveFilters facets={f} params={params} onChange={patch} onResetAll={resetAll} />
+        </div>
+      )}
+
+      <div className="catalog mt-6" data-sidebar={sidebarOpen ? "open" : "closed"}>
+        <aside id="catalog-filters" className="catalog__side" aria-label="Фильтры">
+          <div className="catalog__side-inner">
+            <Filters facets={f} params={params} onChange={patch} />
+          </div>
+        </aside>
+
+        <div
+          className="min-w-0"
+          onClickCapture={(e) => {
+            // Уходим на страницу товара — запоминаем, сколько страниц загружено и где стоит экран.
+            if ((e.target as Element).closest('a[href^="/product/"]')) {
+              saveCatalogRestore({ key: live.current.key, pages: live.current.pages, y: window.scrollY });
+            }
+          }}
+        >
+          <div className={`transition-opacity duration-300 ${loading ? "opacity-50" : ""}`} aria-busy={loading}>
             {status === "error" ? (
               <EmptyState
                 title="Не удалось загрузить товары"
@@ -127,16 +204,16 @@ export function CatalogBrowser({ initial, initialParams }: { initial: CatalogRes
             ) : data.items.length === 0 && !loading ? (
               <EmptyState
                 title="Ничего не нашлось"
-                action={<button type="button" className="btn btn-ghost" onClick={() => setParams(DEFAULT_PARAMS)}>Сбросить поиск и фильтры</button>}
+                action={<button type="button" className="btn btn-solid" onClick={() => setParams({ ...DEFAULT_PARAMS, sort: params.sort })}>Сбросить поиск и фильтры</button>}
               >
                 Попробуйте изменить запрос или убрать часть фильтров.
               </EmptyState>
             ) : (
-              <ProductGrid items={data.items} priorityCount={4} firstRow headingLevel={2} />
+              <ProductGrid items={data.items} priorityCount={4} firstRow headingLevel={2} view={view} sidebar={sidebarOpen} />
             )}
             {status === "more" && (
               <div className="mt-10">
-                <ProductGridSkeleton count={4} />
+                <ProductGridSkeleton count={4} view={view} />
               </div>
             )}
           </div>
@@ -144,7 +221,10 @@ export function CatalogBrowser({ initial, initialParams }: { initial: CatalogRes
           {hasMore && status !== "error" && (
             <div className="mt-16 flex flex-col items-center gap-3">
               <p className="text-sm text-ink-soft">Показано {data.items.length} из {data.total}</p>
-              <button type="button" className="btn btn-ghost min-w-60" disabled={status === "more"} onClick={() => void fetchPage(params, data.page + 1, true)}>
+              <div className="more-progress" aria-hidden>
+                <span style={{ transform: `scaleX(${data.items.length / data.total})` }} />
+              </div>
+              <button type="button" className="btn btn-ghost mt-2 min-w-60" disabled={status === "more"} onClick={() => void fetchPage(params, data.page + 1, true)}>
                 {status === "more" ? "Загружаем…" : "Показать ещё"}
               </button>
             </div>
@@ -152,23 +232,17 @@ export function CatalogBrowser({ initial, initialParams }: { initial: CatalogRes
         </div>
       </div>
 
-      {/* Мобильные фильтры */}
-      {panelOpen && (
-        <div role="dialog" aria-modal="true" aria-label="Фильтры" className="page-fade fixed inset-0 z-50 flex flex-col bg-paper lg:hidden">
-          <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-4">
-            <span className="font-display text-2xl">Фильтры</span>
-            <button type="button" aria-label="Закрыть фильтры" className="icon-btn" onClick={() => setPanelOpen(false)}>
-              <X aria-hidden className="size-6" strokeWidth={1.5} />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-4 pt-6">{filters}</div>
-          <div className="shrink-0 border-t border-line p-4">
-            <button type="button" className="btn btn-solid w-full" onClick={() => setPanelOpen(false)}>
-              Показать {data.total} {plural(data.total, ["работу", "работы", "работ"])}
-            </button>
-          </div>
-        </div>
-      )}
+      <FilterSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        total={data.total}
+        loading={loading}
+        facets={f}
+        params={params}
+        onChange={patch}
+        onResetAll={resetAll}
+        dirty={activeCount > 0}
+      />
     </div>
   );
 }

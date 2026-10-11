@@ -1,72 +1,81 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Copy, ExternalLink, Minus, Plus } from "lucide-react";
+import { Check, ChevronDown, Copy, ExternalLink } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
-import { Price } from "@/components/ui/Price";
-import { ProductImage } from "@/components/ui/ProductImage";
+import { useCartValidation } from "@/components/cart/useCartValidation";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { formatMoney } from "@/lib/format";
+import { ProductImage } from "@/components/ui/ProductImage";
+import { formatMoney, plural } from "@/lib/format";
 import { orderRequestSchema } from "@/lib/orders";
-import { lineKey, type ProductCard } from "@/lib/types";
+import { lineKey } from "@/lib/types";
 
 type OrderOk = { delivered: boolean; text: string; messageUrl: string; demo: boolean };
-type FieldErrors = Partial<Record<"name" | "phone" | "city" | "comment", string>>;
+type Field = "name" | "phone" | "city" | "comment";
+type FieldErrors = Partial<Record<Field, string>>;
+type Values = Record<Field, string>;
+
+/** Шаги: контакты → доставка → оплата и подтверждение. Поля каждого шага проверяются той же схемой (zod), что и на сервере. */
+const STEPS: { key: string; title: string; fields: Field[] }[] = [
+  { key: "contacts", title: "Контакты", fields: ["name", "phone"] },
+  { key: "delivery", title: "Доставка", fields: ["city", "comment"] },
+  { key: "payment", title: "Оплата", fields: [] },
+];
 
 export function CheckoutFlow() {
-  const { lines, total, setQty, remove, clear, reconcile } = useCart();
-  const [notice, setNotice] = useState<string[]>([]);
+  const { lines, count, total, clear, reconcile } = useCart();
+  const { notice, recheck } = useCartValidation();
+  const [step, setStep] = useState(0);
+  const [values, setValues] = useState<Values>({ name: "", phone: "", city: "", comment: "" });
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<OrderOk | null>(null);
   const [copied, setCopied] = useState(false);
-  const checked = useRef(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const panel = useRef<HTMLDivElement>(null);
+  const moved = useRef(false);
 
-  // Проверка актуальности корзины по данным каталога (цены, исчезнувшие товары).
+  // После перехода между шагами фокус — на первое поле нового шага (при первом показе фокус не забираем, чтобы не открывать клавиатуру).
   useEffect(() => {
-    if (checked.current || lines.length === 0) return;
-    checked.current = true;
-    const ids = [...new Set(lines.map((l) => l.card.vkId))];
-    void (async () => {
-      try {
-        const res = await fetch("/api/cart/validate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids }) });
-        if (!res.ok) return;
-        const { items } = (await res.json()) as { items: ({ id: string; state: "ok"; card: ProductCard } | { id: string; state: "gone" })[] };
-        const gone = items.filter((i) => i.state === "gone").map((i) => i.id);
-        const fresh = items.flatMap((i) => (i.state === "ok" ? [i.card] : []));
-        const goneTitles = lines.filter((l) => gone.includes(l.card.vkId)).map((l) => l.card.title);
-        const changed = lines.filter((l) => {
-          const f = fresh.find((x) => x.vkId === l.card.vkId);
-          return f && f.price?.amount !== l.card.price?.amount;
-        });
-        reconcile(fresh, gone);
-        setNotice([
-          ...(goneTitles.length ? [`Больше недоступны и убраны из корзины: ${goneTitles.join(", ")}.`] : []),
-          ...(changed.length ? [`Обновилась цена: ${changed.map((c) => c.card.title).join(", ")}.`] : []),
-        ]);
-      } catch {
-        /* проверка повторится на сервере при отправке заказа */
-      }
-    })();
-  }, [lines, reconcile]);
+    if (!moved.current) return;
+    panel.current?.querySelector<HTMLElement>("input, textarea, button[data-first]")?.focus({ preventScroll: true });
+  }, [step]);
 
   const unavailable = lines.filter((l) => l.card.availability === "unavailable");
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  /** Ошибки полей текущего шага; остальные поля не мешают переходу. */
+  function validate(fields: Field[]): FieldErrors {
+    const parsed = orderRequestSchema.safeParse({
+      customer: values,
+      items: lines.map((l) => ({ vkId: l.card.vkId, variant: l.card.variant, qty: l.qty })),
+    });
+    if (parsed.success) return {};
+    const fe: FieldErrors = {};
+    for (const issue of parsed.error.issues) {
+      const f = issue.path[1];
+      if (issue.path[0] === "customer" && typeof f === "string" && fields.includes(f as Field)) fe[f as Field] ??= issue.message;
+    }
+    return fe;
+  }
+
+  async function submitOrder() {
     setFormError("");
-    const f = new FormData(e.currentTarget);
-    const customer = { name: String(f.get("name") ?? ""), phone: String(f.get("phone") ?? ""), city: String(f.get("city") ?? ""), comment: String(f.get("comment") ?? "") };
-    const parsed = orderRequestSchema.safeParse({ customer, items: lines.map((l) => ({ vkId: l.card.vkId, variant: l.card.variant, qty: l.qty })) });
+    const parsed = orderRequestSchema.safeParse({
+      customer: values,
+      items: lines.map((l) => ({ vkId: l.card.vkId, variant: l.card.variant, qty: l.qty })),
+    });
     if (!parsed.success) {
       const fe: FieldErrors = {};
       for (const issue of parsed.error.issues) {
-        if (issue.path[0] === "customer" && typeof issue.path[1] === "string") fe[issue.path[1] as keyof FieldErrors] ??= issue.message;
+        if (issue.path[0] === "customer" && typeof issue.path[1] === "string") fe[issue.path[1] as Field] ??= issue.message;
         else setFormError(issue.message);
       }
       setErrors(fe);
+      // Вернём на первый шаг с ошибкой.
+      const bad = STEPS.findIndex((s) => s.fields.some((f) => fe[f]));
+      if (bad >= 0) goTo(bad);
       return;
     }
     setErrors({});
@@ -77,7 +86,7 @@ export function CheckoutFlow() {
       if (res.status === 409) {
         const problems = json.problems as { vkId: string; reason: "gone" | "unavailable" }[];
         reconcile([], problems.filter((p) => p.reason === "gone").map((p) => p.vkId));
-        checked.current = false; // повторно сверим корзину с каталогом
+        recheck(); // повторно сверим корзину с каталогом
         setFormError("Некоторые товары больше недоступны. Проверьте корзину и отправьте заказ ещё раз.");
       } else if (res.status === 422) {
         setFormError(json.error ?? "Проверьте данные заказа");
@@ -86,11 +95,35 @@ export function CheckoutFlow() {
       } else {
         setResult(json as OrderOk);
         if ((json as OrderOk).delivered) clear();
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch {
       setFormError("Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  function goTo(i: number) {
+    moved.current = true;
+    setStep(i);
+    setFormError("");
+    panel.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (busy) return;
+    if (step < STEPS.length - 1) {
+      const fe = validate(STEPS[step].fields);
+      setErrors((cur) => ({ ...cur, ...Object.fromEntries(STEPS[step].fields.map((f) => [f, fe[f]])) }));
+      if (Object.keys(fe).length) {
+        panel.current?.querySelector<HTMLElement>("[aria-invalid='true']")?.focus();
+        return;
+      }
+      goTo(step + 1);
+    } else {
+      void submitOrder();
     }
   }
 
@@ -157,82 +190,163 @@ export function CheckoutFlow() {
     );
   }
 
-  /* ───── Корзина + форма ───── */
-  const fieldProps = (name: keyof FieldErrors) => ({
+  /* ───── Шаги + сводка ───── */
+  const set = (f: Field) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setValues((v) => ({ ...v, [f]: e.target.value }));
+    if (errors[f]) setErrors((cur) => ({ ...cur, [f]: undefined }));
+  };
+  const fieldProps = (name: Field) => ({
     id: name,
     name,
+    value: values[name],
+    onChange: set(name),
     "aria-invalid": errors[name] ? (true as const) : undefined,
     "aria-describedby": errors[name] ? `${name}-err` : undefined,
     className: "field",
   });
-  const err = (name: keyof FieldErrors) =>
+  const err = (name: Field) =>
     errors[name] && <p id={`${name}-err`} role="alert" className="field-error mt-2 text-sm text-danger">{errors[name]}</p>;
   const label = "mb-2 block text-sm";
-  const step = "grid size-11 place-items-center transition-colors hover:bg-paper-2";
+  const last = step === STEPS.length - 1;
+  const primary = last ? (busy ? "Проверяем наличие…" : "Подготовить заказ") : "Далее";
+  const totalText = total ? formatMoney(total) : "—";
 
   return (
-    <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-      <section aria-labelledby="cart-h" className="min-w-0 lg:col-span-7">
-        <h2 id="cart-h" className="text-h3 font-normal">Ваш выбор</h2>
-        {notice.map((n) => <p key={n} role="status" className="field-error mt-4 rounded-md border border-line border-l-copper bg-paper-2 px-4 py-3 text-sm [border-left-width:3px]">{n}</p>)}
-        <ul className="mt-6 divide-y divide-line border-y border-line">
-          {lines.map(({ card, qty }) => (
-            <li key={lineKey(card)} className="flex gap-5 py-6">
-              <Link href={`/product/${card.slug}`} className="mat block w-24 shrink-0 self-start !p-1.5 sm:w-28" aria-label={card.title}>
-                <span className="mat-photo"><ProductImage src={card.image} alt="" sizes="112px" /></span>
-              </Link>
-              <div className="flex min-w-0 flex-1 flex-col">
-                <Link href={`/product/${card.slug}`} className="u-link self-start text-lg leading-snug">{card.title}</Link>
-                {card.variant && <span className="mt-1 text-xs text-ink-soft">{card.variant}</span>}
-                {card.availability === "unavailable" && <span className="field-error mt-1 text-sm text-danger">Нет в наличии — уберите из заказа</span>}
-                <Price price={card.price} className="mt-2 text-sm" />
-                <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-4">
-                  <div className="flex items-center rounded-md border border-field" role="group" aria-label={`Количество: ${card.title}`}>
-                    <button type="button" className={`${step} rounded-l-md`} aria-label="Уменьшить количество" onClick={() => setQty(lineKey(card), qty - 1)}><Minus aria-hidden className="size-4" /></button>
-                    <output className="min-w-8 text-center tabular-nums">{qty}</output>
-                    <button type="button" className={`${step} rounded-r-md`} aria-label="Увеличить количество" onClick={() => setQty(lineKey(card), qty + 1)}><Plus aria-hidden className="size-4" /></button>
-                  </div>
-                  <span className="font-display text-xl font-medium tabular-nums">{card.price ? formatMoney({ amount: card.price.amount * qty, currency: card.price.currency }) : ""}</span>
-                  <button type="button" onClick={() => remove(lineKey(card))} className="min-h-11 px-1 text-sm text-ink-soft underline-offset-4 transition-colors hover:text-danger hover:underline">Удалить</button>
+    <div className="cart-layout">
+      <section aria-labelledby="step-h" className="min-w-0">
+        {notice.map((n) => (
+          <p key={n} role="status" className="field-error mb-4 rounded-md border border-line bg-paper-2 px-4 py-3 text-sm [border-left-width:3px] border-l-copper">{n}</p>
+        ))}
+
+        <ol className="steps" aria-label="Шаги оформления">
+          {STEPS.map((s, i) => {
+            const state = i === step ? "active" : i < step ? "done" : "todo";
+            return (
+              <li key={s.key} className="steps__item" data-state={state} data-done={i < step}>
+                {i < step ? (
+                  <button type="button" className="steps__btn" onClick={() => goTo(i)} aria-label={`Вернуться к шагу «${s.title}»`}>
+                    <span className="steps__num"><Check aria-hidden className="size-4" strokeWidth={2} /></span>
+                    <span className="steps__label">{s.title}</span>
+                  </button>
+                ) : (
+                  <span className="steps__btn" aria-current={i === step ? "step" : undefined}>
+                    <span className="steps__num">{i + 1}</span>
+                    <span className="steps__label">{s.title}</span>
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+
+        <form id="checkout-form" onSubmit={onSubmit} noValidate className="mt-8">
+          <div key={step} ref={panel} className="step-panel max-w-xl">
+            <h2 id="step-h" className="text-h3 font-normal">{STEPS[step].title}</h2>
+
+            {step === 0 && (
+              <div className="mt-6 space-y-5">
+                <p className="text-sm text-ink-soft">Как с вами связаться, чтобы подтвердить заказ.</p>
+                <div>
+                  <label htmlFor="name" className={label}>Имя <span className="text-copper">*</span></label>
+                  <input {...fieldProps("name")} autoComplete="name" enterKeyHint="next" />{err("name")}
+                </div>
+                <div>
+                  <label htmlFor="phone" className={label}>Телефон <span className="text-copper">*</span></label>
+                  <input {...fieldProps("phone")} type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="next" placeholder="+7 900 000-00-00" />{err("phone")}
                 </div>
               </div>
+            )}
+
+            {step === 1 && (
+              <div className="mt-6 space-y-5">
+                <p className="text-sm text-ink-soft">Стоимость и сроки доставки мастера рассчитают после получения заказа и согласуют с вами лично.</p>
+                <div>
+                  <label htmlFor="city" className={label}>Город или страна доставки</label>
+                  <input {...fieldProps("city")} autoComplete="address-level2" enterKeyHint="next" />{err("city")}
+                </div>
+                <div>
+                  <label htmlFor="comment" className={label}>Комментарий</label>
+                  <textarea {...fieldProps("comment")} rows={4} placeholder="Адрес, удобное время, пожелания к упаковке" />{err("comment")}
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="mt-6 space-y-6">
+                <p className="text-ink-soft">
+                  Оплата на сайте не принимается. Мы подготовим текст заказа — отправьте его мастерам сообщением, а способ оплаты вы согласуете с ними лично.
+                </p>
+                <dl className="divide-y divide-line rounded-lg border border-line bg-paper-2 text-[0.9375rem]">
+                  {([
+                    ["Имя", values.name, 0],
+                    ["Телефон", values.phone, 0],
+                    ["Доставка", values.city || "уточним в сообщениях", 1],
+                  ] as const).map(([k, v, to]) => (
+                    <div key={k} className="flex items-center justify-between gap-4 px-4 py-3">
+                      <dt className="text-ink-soft">{k}</dt>
+                      <dd className="min-w-0 flex-1 truncate text-right">{v}</dd>
+                      <button type="button" className="u-link min-h-11 shrink-0 px-1 text-sm" onClick={() => goTo(to)} aria-label={`Изменить: ${k}`}>Изменить</button>
+                    </div>
+                  ))}
+                </dl>
+                {values.comment && <p className="text-sm text-ink-soft">Комментарий: {values.comment}</p>}
+                {unavailable.length > 0 && <p role="alert" className="text-sm text-danger">Уберите из корзины работы, которых нет в наличии, — иначе заказ не получится подготовить.</p>}
+              </div>
+            )}
+
+            {formError && <p role="alert" className="field-error mt-6 rounded-md border border-danger/40 bg-paper px-4 py-3 text-sm text-danger">{formError}</p>}
+
+            <div className="mt-8 flex flex-wrap items-center gap-3 max-lg:hidden">
+              <button type="submit" disabled={busy || (last && unavailable.length > 0)} className="btn btn-solid min-w-[12rem]">{primary}</button>
+              {step > 0 && <button type="button" className="btn btn-ghost" onClick={() => goTo(step - 1)}>Назад</button>}
+            </div>
+            {step > 0 && <button type="button" className="u-link mt-6 min-h-11 text-sm lg:hidden" onClick={() => goTo(step - 1)}>← Назад</button>}
+          </div>
+        </form>
+      </section>
+
+      <aside aria-label="Ваш заказ" className="summary">
+        <button
+          type="button"
+          className="flex min-h-11 w-full items-center justify-between gap-3 text-left lg:pointer-events-none"
+          aria-expanded={summaryOpen}
+          aria-controls="summary-lines"
+          onClick={() => setSummaryOpen((v) => !v)}
+        >
+          <span className="text-h3 font-display">Ваш заказ</span>
+          <span className="flex items-center gap-2 text-sm text-ink-soft">
+            {count} {plural(count, ["работа", "работы", "работ"])}
+            <ChevronDown aria-hidden className={`size-4 transition-transform duration-300 lg:hidden ${summaryOpen ? "rotate-180" : ""}`} />
+          </span>
+        </button>
+        <ul id="summary-lines" className={`mt-4 space-y-4 ${summaryOpen ? "" : "max-lg:hidden"}`}>
+          {lines.map(({ card, qty }) => (
+            <li key={lineKey(card)} className="flex items-center gap-3">
+              <span className="mat w-14 shrink-0 !p-1">
+                <span className="mat-photo !rounded-[2px]"><ProductImage src={card.image} alt="" focal={card.focalPoint} sizes="56px" /></span>
+              </span>
+              <span className="min-w-0 flex-1 text-sm leading-snug">
+                <span className="line-clamp-2">{card.title}</span>
+                <span className="text-ink-soft">{qty} × {card.price ? formatMoney(card.price) : "—"}</span>
+              </span>
             </li>
           ))}
         </ul>
-      </section>
-
-      <section aria-labelledby="form-h" className="min-w-0 lg:col-span-5">
-        <div className="rounded-lg border border-line bg-paper-2 p-6 sm:p-8 lg:sticky lg:top-[calc(var(--header-h)+var(--space-3))]">
-          <h2 id="form-h" className="text-h3 font-normal">Контакты</h2>
-          <p className="mt-2 text-sm text-ink-soft">Мы подготовим текст заказа. Оплата и доставка согласуются с мастерами в личных сообщениях.</p>
-          <form onSubmit={onSubmit} noValidate className="mt-8 space-y-5">
-            <div>
-              <label htmlFor="name" className={label}>Имя <span className="text-copper">*</span></label>
-              <input {...fieldProps("name")} autoComplete="name" />{err("name")}
-            </div>
-            <div>
-              <label htmlFor="phone" className={label}>Телефон <span className="text-copper">*</span></label>
-              <input {...fieldProps("phone")} type="tel" autoComplete="tel" placeholder="+7 900 000-00-00" />{err("phone")}
-            </div>
-            <div>
-              <label htmlFor="city" className={label}>Город или страна доставки</label>
-              <input {...fieldProps("city")} autoComplete="address-level2" />{err("city")}
-            </div>
-            <div>
-              <label htmlFor="comment" className={label}>Комментарий</label>
-              <textarea {...fieldProps("comment")} rows={3} />{err("comment")}
-            </div>
-            {formError && <p role="alert" className="field-error rounded-md border border-danger/40 bg-paper px-4 py-3 text-sm text-danger">{formError}</p>}
-            <div className="rule flex items-baseline justify-between pt-6">
-              <span className="text-ink-soft">Итого</span>
-              <span className="font-display text-h3 font-medium tabular-nums">{total ? formatMoney(total) : "—"}</span>
-            </div>
-            <button type="submit" disabled={busy || unavailable.length > 0} className="btn btn-solid w-full">
-              {busy ? "Проверяем наличие…" : "Подготовить заказ"}
-            </button>
-          </form>
+        <div className="mt-5 flex items-baseline justify-between border-t border-line pt-5">
+          <span className="text-ink-soft">Итого</span>
+          <span className="font-display text-h3 font-medium tabular-nums">{totalText}</span>
         </div>
-      </section>
+        <Link href="/cart" className="u-link mt-4 inline-flex min-h-11 items-center text-sm max-lg:hidden">Изменить состав заказа</Link>
+      </aside>
+
+      {/* Телефон и планшет: итог и главная кнопка закреплены внизу, в зоне большого пальца */}
+      <div className="checkout-bar">
+        <div className="min-w-0 flex-1 leading-tight">
+          <p className="text-xs text-ink-soft">Итого</p>
+          <p className="font-display text-xl font-medium tabular-nums">{totalText}</p>
+        </div>
+        <button type="submit" form="checkout-form" disabled={busy || (last && unavailable.length > 0)} className="btn btn-solid min-w-[11rem]">{primary}</button>
+      </div>
     </div>
   );
 }

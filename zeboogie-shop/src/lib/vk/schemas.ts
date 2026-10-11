@@ -42,6 +42,8 @@ export const vkMarketItem = z.object({
   availability: z.number().optional(),
   photos: z.array(vkPhoto).optional(),
   albums_ids: z.array(z.number()).optional(),
+  /** Лайки (если сообщество их отдаёт): основа для сортировки «Популярные». */
+  likes: z.object({ count: z.number().optional() }).loose().optional(),
   /** Характеристики товара (если у сообщества включены). */
   property_values: z
     .array(

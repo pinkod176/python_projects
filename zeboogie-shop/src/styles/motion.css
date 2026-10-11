@@ -1,0 +1,67 @@
+/*
+ * ДВИЖЕНИЕ: появление блоков при прокрутке, переходы между страницами, ключевые кадры, «без анимаций».
+ * Анимируем только transform и opacity (плюс цвет у мелких элементов и строки аккордеона).
+ */
+@layer components {
+  /* ───── Появление при прокрутке (см. components/ui/Reveal.tsx) ───── */
+  .reveal {
+    transition:
+      opacity var(--dur-appear) var(--ease) var(--reveal-delay, 0ms),
+      transform var(--dur-appear) var(--ease) var(--reveal-delay, 0ms);
+  }
+  .reveal[data-reveal="hidden"] { opacity: 0; transform: translate3d(0, var(--reveal-distance), 0); }
+  .reveal[data-reveal="enter"], .reveal-load {
+    animation: reveal-in var(--dur-appear) var(--ease) var(--reveal-delay, 0ms) both;
+  }
+  /* «Мягкий» вариант: только подъём без прозрачности — для главных фото, чтобы не откладывать LCP. */
+  .reveal-soft.reveal-load, .reveal-soft[data-reveal="enter"] { animation-name: rise-in; }
+  .reveal-soft[data-reveal="hidden"] { opacity: 1; }
+}
+
+@layer utilities {
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .page-fade { animation: page-fade 480ms var(--ease) both; }
+  /* Фолбэк для браузеров без View Transitions API: простой fade при открытии страницы. */
+  @supports not (view-transition-name: none) {
+    .page-enter { animation: page-fade 480ms var(--ease) both; }
+  }
+}
+
+/* ───────── Ключевые кадры ───────── */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translate3d(0, var(--reveal-distance), 0); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes rise-in { from { transform: translate3d(0, var(--reveal-distance), 0); } to { transform: none; } }
+@keyframes page-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes panel-in { from { opacity: 0; translate: 0 -8px; } to { opacity: 1; translate: 0 0; } }
+@keyframes error-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@keyframes shimmer { to { transform: translateX(100%); } }
+@keyframes bump { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes ring-out { from { transform: scale(0.7); opacity: 0.7; } to { transform: scale(1.9); opacity: 0; } }
+@keyframes hero-settle { from { transform: scale(1.06); } to { transform: scale(1); } }
+
+/* ───────── Переходы между страницами (View Transitions API) ───────── */
+::view-transition { pointer-events: none; }
+::view-transition-old(.page-out) { animation: vt-out 200ms var(--ease) both; }
+::view-transition-new(.page-in) { animation: vt-in 460ms var(--ease) 140ms both; }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(10px); } }
+
+/* ───────── Без анимаций по запросу системы ───────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal[data-reveal="hidden"] { opacity: 1; transform: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}

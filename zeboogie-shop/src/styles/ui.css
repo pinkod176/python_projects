@@ -1,0 +1,422 @@
+/*
+ * ОБЩИЕ КОМПОНЕНТЫ: контейнер, паспарту, кнопки, поля, «таблетки», ссылки, иконки-кнопки, счётчики, сердечко,
+ * количество, аккордеон, ползунок цены, шторки (dialog).
+ * Hover-эффекты — только для мыши (hover: hover и pointer: fine). На сенсорных экранах у всего есть заметный :active.
+ */
+@layer components {
+  .container-x {
+    width: min(100% - 2 * var(--gutter), var(--container));
+    margin-inline: auto;
+  }
+  .section-y { padding-block: var(--section-y); }
+  .rule { border-top: 1px solid var(--border); }
+
+  .eyebrow {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+  }
+
+  /* ───── Паспарту: фото «висит» в песочной рамке с тонкой границей ───── */
+  .mat {
+    background: var(--surface);
+    padding: clamp(6px, 1vw, 10px);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+  }
+  .mat-photo {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: var(--card-ratio);
+    background: var(--surface-deep);
+    border-radius: var(--r-sm);
+  }
+  /* Мерцание-заглушка, пока фото грузится. */
+  .mat-photo:has(img[data-loading="true"])::after,
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 20%, rgb(247 241 231 / 0.55) 50%, transparent 80%);
+    transform: translateX(-100%);
+    animation: shimmer 1.7s var(--ease) infinite;
+    pointer-events: none;
+  }
+  .skeleton { position: relative; overflow: hidden; background: var(--surface); border-radius: var(--r); }
+  .img-fade { transition: opacity 700ms var(--ease); }
+  .img-fade[data-loading="true"] { opacity: 0; }
+  /* Фото на первом экране «оседает»: медленный лёгкий зум от 1.06 к 1 (только transform). */
+  .hero-img { animation: hero-settle 1800ms var(--ease) both; }
+
+  /* ───── Кнопки ───── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 3.25rem;
+    padding: 0 1.75rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1;
+    text-align: center;
+    border: 1px solid transparent;
+    border-radius: var(--r);
+    transition:
+      background-color var(--dur-hover) var(--ease),
+      color var(--dur-hover) var(--ease),
+      border-color var(--dur-hover) var(--ease),
+      transform var(--dur-hover) var(--ease);
+  }
+  .btn-sm { min-height: var(--hit); padding: 0 1.1rem; font-size: 0.9rem; }
+  .btn:disabled { opacity: 0.5; }
+  .btn-solid { background: var(--moss); border-color: var(--moss); color: var(--on-accent); }
+  .btn-ghost { background: transparent; border-color: var(--border-strong); color: var(--text); }
+  .btn:active:not(:disabled) { transform: translateY(1px) scale(0.985); }
+  .btn-solid:active:not(:disabled) { background: var(--moss-deep); border-color: var(--moss-deep); }
+  .btn-ghost:active:not(:disabled) { background: var(--surface-deep); }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-solid:hover:not(:disabled) { background: var(--copper-deep); border-color: var(--copper-deep); }
+    .btn-ghost:hover:not(:disabled) { background: var(--surface); border-color: var(--moss); color: var(--moss-deep); }
+  }
+
+  /* Кнопка с подтверждением: два слоя текста сменяют друг друга (opacity + transform). */
+  .btn-confirm { position: relative; overflow: hidden; }
+  .btn-confirm__idle, .btn-confirm__done {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    transition: opacity 320ms var(--ease), transform 420ms var(--ease);
+  }
+  .btn-confirm__done { position: absolute; inset: 0; justify-content: center; opacity: 0; transform: translateY(70%); }
+  .btn-confirm[data-done="true"] { background: var(--moss-deep); border-color: var(--moss-deep); }
+  .btn-confirm[data-done="true"] .btn-confirm__idle { opacity: 0; transform: translateY(-70%); }
+  .btn-confirm[data-done="true"] .btn-confirm__done { opacity: 1; transform: none; }
+
+  /* ───── Поля ввода ───── */
+  .field {
+    width: 100%;
+    min-height: 3.5rem;
+    padding: 0.9rem 1rem;
+    background: rgb(247 241 231 / 0.45);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r);
+    color: inherit;
+    font: inherit;
+    transition: border-color var(--dur-hover) var(--ease), background-color var(--dur-hover) var(--ease);
+  }
+  .field::placeholder { color: var(--text-soft); opacity: 1; }
+  .field:focus-visible {
+    outline: 3px solid rgb(94 107 74 / 0.28);
+    outline-offset: 0;
+    border-color: var(--moss);
+    background: rgb(247 241 231 / 0.8);
+  }
+  .field[aria-invalid="true"] { border-color: var(--danger); }
+  .field-error { animation: error-in 320ms var(--ease) both; }
+
+  /* ───── «Таблетки»: radio/checkbox (input + .chip) и кнопки-фильтры (.chip с aria-pressed) ───── */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: var(--hit);
+    padding: 0 1.15rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-pill);
+    background: transparent;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-hover) var(--ease),
+      color var(--dur-hover) var(--ease),
+      border-color var(--dur-hover) var(--ease),
+      transform var(--dur-hover) var(--ease);
+  }
+  .chip small { font-size: 0.75rem; color: var(--text-soft); transition: color var(--dur-hover) var(--ease); }
+  input:checked + .chip, .chip[aria-pressed="true"] { background: var(--moss); border-color: var(--moss); color: var(--on-accent); }
+  input:checked + .chip small, .chip[aria-pressed="true"] small { color: var(--on-accent-soft); }
+  input:focus-visible + .chip { outline: 2px solid var(--moss); outline-offset: 3px; }
+  input:not(:checked) + .chip:active, .chip[aria-pressed="false"]:active { background: var(--surface-deep); transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) {
+    input:not(:checked) + .chip:hover, .chip[aria-pressed="false"]:hover { border-color: var(--copper-deep); background: var(--surface); }
+  }
+  /* Чип с крестиком: выбранный фильтр над каталогом. */
+  .chip-x { gap: 0.4rem; padding-right: 0.6rem; background: var(--surface); border-color: var(--border); }
+  .chip-x:active { background: var(--surface-deep); }
+
+  /* ───── Ссылки: подчёркивание «выезжает» слева направо ───── */
+  .u-link { position: relative; display: inline-block; text-decoration: none; }
+  .u-link::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -3px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform 380ms var(--ease);
+  }
+  .u-link[aria-current="page"]::after, .u-link:active::after { transform: scaleX(1); }
+  @media (hover: hover) and (pointer: fine) {
+    .u-link { transition: color var(--dur-hover) var(--ease); }
+    .u-link:hover { color: var(--copper-deep); }
+    .u-link:hover::after, .u-link:focus-visible::after { transform: scaleX(1); transform-origin: left center; }
+  }
+
+  /* ───── Иконки-кнопки (шапка, закрытие, стрелки): зона нажатия не меньше 44×44 ───── */
+  .icon-btn {
+    position: relative;
+    display: grid;
+    flex: none;
+    width: var(--hit);
+    height: var(--hit);
+    place-items: center;
+    border-radius: var(--r);
+    transition: background-color var(--dur-hover) var(--ease), color var(--dur-hover) var(--ease), transform var(--dur-hover) var(--ease);
+  }
+  .icon-btn:active { background: var(--surface-deep); transform: scale(0.94); }
+  @media (hover: hover) and (pointer: fine) { .icon-btn:hover { background: var(--surface); color: var(--moss-deep); } }
+
+  /* ───── Счётчик на иконке (избранное, корзина) ───── */
+  .badge {
+    position: absolute;
+    top: 2px; right: 0;
+    display: grid;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    padding: 0 0.28rem;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--copper-deep);
+    color: var(--on-accent);
+    font-size: 0.68rem;
+    font-weight: 500;
+    line-height: 1;
+    pointer-events: none;
+    animation: bump 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  /* ───── Метки на фото (Новинка, Последний экземпляр, Под заказ, Нет в наличии) ───── */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    padding: 0 0.55rem;
+    border-radius: var(--r-sm);
+    background: rgb(241 234 224 / 0.94);
+    color: var(--text);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .tag[data-kind="new"] { background: var(--moss); color: var(--on-accent); }
+  .tag[data-kind="soldout"] { background: var(--footer-bg); color: var(--on-accent); }
+
+  /* ───── Избранное: сердце заполняется с лёгким «пульсом» ───── */
+  .fav {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--hit);
+    height: var(--hit);
+    border-radius: var(--r);
+    background: rgb(241 234 224 / 0.92);
+    color: var(--text);
+    transition: background-color var(--dur-hover) var(--ease), transform var(--dur-hover) var(--ease);
+  }
+  .fav:active { transform: scale(0.92); }
+  @media (hover: hover) and (pointer: fine) { .fav:hover { background: var(--bg); } }
+  .fav__icon { grid-area: 1 / 1; width: 1.3rem; height: 1.3rem; }
+  .fav__filled {
+    color: var(--copper-deep);
+    fill: currentColor;
+    opacity: 0;
+    transform: scale(0.4);
+    transition: opacity 240ms var(--ease), transform 520ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .fav[aria-pressed="true"] .fav__filled { opacity: 1; transform: scale(1); }
+  .fav__ring {
+    position: absolute;
+    inset: 0.55rem;
+    border: 1.5px solid var(--copper);
+    border-radius: 999px;
+    animation: ring-out 700ms var(--ease) both;
+    pointer-events: none;
+  }
+
+  /* ───── Количество − 1 + ───── */
+  .qty {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r);
+  }
+  .qty button {
+    display: grid;
+    width: var(--hit);
+    height: var(--hit);
+    place-items: center;
+    transition: background-color var(--dur-hover) var(--ease);
+  }
+  .qty button:first-child { border-radius: var(--r) 0 0 var(--r); }
+  .qty button:last-child { border-radius: 0 var(--r) var(--r) 0; }
+  .qty button:active:not(:disabled) { background: var(--surface-deep); }
+  .qty button:disabled { opacity: 0.4; }
+  .qty output { min-width: 2.25rem; text-align: center; font-variant-numeric: tabular-nums; }
+  @media (hover: hover) and (pointer: fine) { .qty button:hover:not(:disabled) { background: var(--surface); } }
+
+  /* ───── Аккордеон: строки grid-template-rows 0fr → 1fr, содержимое проявляется плавно ───── */
+  .acc { border-top: 1px solid var(--border); }
+  .acc:last-child { border-bottom: 1px solid var(--border); }
+  .acc__head {
+    display: flex;
+    width: 100%;
+    min-height: 3.25rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding-block: 0.5rem;
+    text-align: left;
+    font-size: 1rem;
+    transition: color var(--dur-hover) var(--ease);
+  }
+  .acc__icon { flex: none; transition: transform 380ms var(--ease); color: var(--copper-deep); }
+  .acc__head[aria-expanded="true"] .acc__icon { transform: rotate(45deg); }
+  .acc__head:active { color: var(--copper-deep); }
+  @media (hover: hover) and (pointer: fine) { .acc__head:hover { color: var(--copper-deep); } }
+  .acc__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition: grid-template-rows 420ms var(--ease), visibility 0s linear 420ms;
+  }
+  .acc__panel[data-open="true"] { grid-template-rows: 1fr; visibility: visible; transition-delay: 0s; }
+  .acc__inner { overflow: hidden; min-height: 0; opacity: 0; transition: opacity 320ms var(--ease); }
+  .acc__panel[data-open="true"] .acc__inner { opacity: 1; transition-delay: 90ms; }
+
+  /* ───── Ползунок цены с двумя ручками ───── */
+  .range { position: relative; height: 2.75rem; }
+  .range__track { position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 4px; background: var(--border); }
+  .range__fill { position: absolute; top: 0; bottom: 0; background: var(--moss); border-radius: 4px; }
+  .range input[type="range"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background: none;
+    pointer-events: none;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .range input[type="range"]::-webkit-slider-runnable-track { background: none; height: 100%; }
+  .range input[type="range"]::-moz-range-track { background: none; height: 100%; }
+  .range input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    pointer-events: auto;
+    width: 1.75rem; height: 1.75rem;
+    margin-top: calc((2.75rem - 1.75rem) / 2);
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--moss);
+    box-shadow: var(--sh-soft);
+    cursor: grab;
+  }
+  .range input[type="range"]::-moz-range-thumb {
+    pointer-events: auto;
+    width: calc(1.75rem - 4px); height: calc(1.75rem - 4px);
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--moss);
+    box-shadow: var(--sh-soft);
+    cursor: grab;
+  }
+  .range input[type="range"]:active::-webkit-slider-thumb { cursor: grabbing; background: var(--surface); }
+  .range input[type="range"]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--moss); outline-offset: 3px; }
+  .range input[type="range"]:focus-visible::-moz-range-thumb { outline: 2px solid var(--moss); outline-offset: 3px; }
+
+  /* ───── Шторки (dialog): справа — корзина, снизу — фильтры, на весь экран — меню и поиск ───── */
+  .sheet {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--bg);
+    color: var(--text);
+    overscroll-behavior: contain;
+    transition:
+      translate 480ms var(--ease),
+      opacity 320ms var(--ease),
+      overlay 480ms allow-discrete,
+      display 480ms allow-discrete;
+  }
+  .sheet[open] { display: flex; flex-direction: column; }
+  .sheet::backdrop {
+    background: var(--scrim);
+    opacity: 0;
+    transition: opacity 380ms var(--ease), overlay 380ms allow-discrete, display 380ms allow-discrete;
+  }
+  .sheet[open]::backdrop { opacity: 1; }
+  @starting-style { .sheet[open]::backdrop { opacity: 0; } }
+
+  /* справа */
+  .sheet[data-side="right"] {
+    margin-left: auto;
+    width: min(100%, 28rem);
+    height: 100dvh;
+    max-height: 100dvh;
+    border-left: 1px solid var(--border);
+    border-radius: var(--r-lg) 0 0 var(--r-lg);
+    box-shadow: var(--sh-panel);
+    translate: 100% 0;
+    opacity: 0;
+  }
+  .sheet[data-side="right"][open] { translate: 0 0; opacity: 1; }
+  @starting-style { .sheet[data-side="right"][open] { translate: 100% 0; opacity: 0; } }
+
+  /* снизу */
+  .sheet[data-side="bottom"] {
+    margin: auto 0 0;
+    width: 100%;
+    max-height: min(88dvh, 44rem);
+    border-radius: 1rem 1rem 0 0;
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -12px 40px rgb(60 40 20 / 0.14);
+    translate: 0 100%;
+    opacity: 0;
+  }
+  .sheet[data-side="bottom"][open] { translate: 0 0; opacity: 1; }
+  @starting-style { .sheet[data-side="bottom"][open] { translate: 0 100%; opacity: 0; } }
+
+  /* на весь экран */
+  .sheet[data-side="full"] {
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    opacity: 0;
+    translate: 0 -12px;
+  }
+  .sheet[data-side="full"][open] { opacity: 1; translate: 0 0; }
+  @starting-style { .sheet[data-side="full"][open] { opacity: 0; translate: 0 -12px; } }
+
+  /* по центру (быстрый просмотр, увеличенное фото) */
+  .sheet[data-side="center"] {
+    margin: auto;
+    width: min(100% - 2 * var(--gutter), 64rem);
+    max-height: min(100dvh - 2 * var(--space-2), 48rem);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-hover);
+    opacity: 0;
+    translate: 0 16px;
+  }
+  .sheet[data-side="center"][open] { opacity: 1; translate: 0 0; }
+  @starting-style { .sheet[data-side="center"][open] { opacity: 0; translate: 0 16px; } }
+}

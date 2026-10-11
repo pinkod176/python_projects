@@ -1,20 +1,35 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import Link from "next/link";
+import { Plus, SlidersHorizontal } from "lucide-react";
 import type { ProductCard } from "@/lib/types";
 import { useCart } from "@/components/cart/CartProvider";
+import { useQuickView } from "./QuickView";
 
-/** Кнопка «в корзину» на карточке. На устройствах с hover появляется при наведении, на сенсорных — всегда видна. */
-export function QuickAdd({ card }: { card: ProductCard }) {
+/**
+ * Действия на фото карточки. Телефон: компактная кнопка «+» (всегда на месте, 44×44).
+ * Мышь: панель «Быстрый просмотр» + «В корзину», проявляется при наведении.
+ * Если у товара есть варианты (размер и т. п.), добавить с карточки нельзя — ссылка на страницу товара.
+ */
+export function CardActions({ card }: { card: ProductCard }) {
   const { add } = useCart();
+  const { open } = useQuickView();
   return (
-    <button
-      type="button"
-      onClick={() => add(card)}
-      aria-label={`Добавить «${card.title}» в корзину`}
-      className="card__add grid size-11 place-items-center rounded-md bg-moss text-on-accent hover:bg-wood"
-    >
-      <Plus aria-hidden className="size-5" strokeWidth={1.5} />
-    </button>
+    <div className="card__actions">
+      <button type="button" className="card__quick" onClick={() => open(card)} aria-haspopup="dialog" aria-label={`Быстрый просмотр: ${card.title}`}>
+        Быстрый просмотр
+      </button>
+      {card.hasOptions ? (
+        <Link href={`/product/${card.slug}`} className="card__add" aria-label={`Выбрать вариант: ${card.title}`}>
+          <SlidersHorizontal aria-hidden className="size-[1.1rem]" strokeWidth={1.75} />
+          <span className="card__add-label">Выбрать</span>
+        </Link>
+      ) : (
+        <button type="button" className="card__add" onClick={() => add(card)} aria-label={`Добавить «${card.title}» в корзину`}>
+          <Plus aria-hidden className="size-5" strokeWidth={1.75} />
+          <span className="card__add-label">В корзину</span>
+        </button>
+      )}
+    </div>
   );
 }

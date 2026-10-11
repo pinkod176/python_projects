@@ -1,0 +1,272 @@
+/*
+ * ШАПКА И НАВИГАЦИЯ: демо-плашка, липкая шапка (сжимается при прокрутке), вкладки, выпадающий «Каталог»,
+ * полноэкранное меню, поиск, нижняя панель быстрых действий на телефоне.
+ */
+@layer components {
+  .demo-banner {
+    display: flex;
+    height: var(--banner-h);
+    align-items: center;
+    justify-content: center;
+    padding-inline: var(--gutter);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-soft);
+    font-size: 0.75rem;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ───── Липкая шапка: при прокрутке вниз «сжимается» и получает blur, при прокрутке вверх возвращается ───── */
+  .site-header {
+    --shift-now: 0px;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    height: var(--header-h);
+    pointer-events: none; /* кликабельны только реальные элементы внутри */
+  }
+  .site-header[data-compact="true"] { --shift-now: var(--header-shift); }
+  .site-header__bg {
+    position: absolute;
+    inset: 0;
+    background: var(--header-glass);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    backdrop-filter: blur(14px) saturate(1.1);
+    border-bottom: 1px solid var(--border);
+    opacity: 0;
+    transition: opacity var(--dur-header) var(--ease), transform var(--dur-header) var(--ease);
+  }
+  .site-header[data-scrolled="true"] .site-header__bg { opacity: 1; }
+  .site-header[data-compact="true"] .site-header__bg { transform: translateY(calc(var(--shift-now) * -1)); }
+  .site-header__row {
+    position: relative;
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    transition: transform var(--dur-header) var(--ease);
+  }
+  .site-header__row > * { pointer-events: auto; }
+  .site-header[data-compact="true"] .site-header__row { transform: translateY(calc(var(--shift-now) / -2)); }
+  .site-header__brand {
+    display: flex;
+    min-height: var(--hit);
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1;
+    transform-origin: left center;
+    transition: transform var(--dur-header) var(--ease);
+  }
+  .site-header[data-compact="true"] .site-header__brand { transform: scale(0.88); }
+  .site-header__actions { display: flex; align-items: center; gap: var(--hit-gap); }
+
+  /* ───── Вкладки (десктоп ≥ 1280 px; ниже — бургер) ───── */
+  .nav { display: none; align-self: stretch; min-width: 0; }
+  @media (min-width: 80rem) { .nav { display: flex; flex: 1; justify-content: center; } }
+  .nav__list { display: flex; align-items: stretch; gap: clamp(1rem, 1.8vw, 1.75rem); }
+  .nav__item { display: flex; align-items: center; }
+  .nav__tab {
+    position: relative;
+    display: inline-flex;
+    min-height: var(--hit);
+    align-items: center;
+    padding-inline: 0.25rem;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    transition: color var(--dur-hover) var(--ease);
+  }
+  .nav__tab::after {
+    content: "";
+    position: absolute;
+    left: 0.25rem; right: 0.25rem; bottom: 4px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--copper-deep);
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform 380ms var(--ease);
+  }
+  .nav__tab[aria-current="page"]::after, .nav__tab:active::after { transform: scaleX(1); }
+  .nav__tab[aria-current="page"] { color: var(--text); }
+  @media (hover: hover) and (pointer: fine) {
+    .nav__tab:hover { color: var(--copper-deep); }
+    .nav__tab:hover::after, .nav__tab:focus-visible::after { transform: scaleX(1); transform-origin: left center; }
+  }
+  .nav__caret {
+    display: grid;
+    width: var(--hit);
+    height: var(--hit);
+    margin-left: -0.5rem;
+    place-items: center;
+    border-radius: var(--r);
+    color: var(--text-soft);
+    transition: color var(--dur-hover) var(--ease), background-color var(--dur-hover) var(--ease);
+  }
+  .nav__caret svg { transition: transform 320ms var(--ease); }
+  .nav__caret[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .nav__caret:active { background: var(--surface); }
+  @media (hover: hover) and (pointer: fine) { .nav__caret:hover { color: var(--copper-deep); } }
+
+  /* ───── Выпадающий «Каталог»: подборки + крупные фото ───── */
+  .catmenu {
+    position: absolute;
+    left: 0; right: 0; top: 100%;
+    z-index: var(--z-dropdown);
+    visibility: hidden;
+    pointer-events: none;
+    opacity: 0;
+    translate: 0 -8px;
+    /* transform держит панель у нижнего края «стекла», когда шапка сжата */
+    transform: translateY(calc(var(--shift-now) / -2));
+    transition:
+      opacity 260ms var(--ease),
+      translate 340ms var(--ease),
+      transform var(--dur-header) var(--ease),
+      visibility 0s linear 340ms;
+  }
+  .catmenu[data-open="true"] {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+    translate: 0 0;
+    transition-delay: 0s;
+  }
+  .catmenu__card {
+    display: grid;
+    grid-template-columns: minmax(14rem, 1fr) 2.4fr;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-hover);
+  }
+  .catmenu__list a {
+    display: flex;
+    min-height: var(--hit);
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    font-family: var(--font-display-stack);
+    font-size: 1.5rem;
+    letter-spacing: -0.01em;
+    transition: color var(--dur-hover) var(--ease), padding-left var(--dur-hover) var(--ease);
+  }
+  .catmenu__list a small { font-family: var(--font-ui-stack); font-size: 0.75rem; color: var(--text-soft); }
+  .catmenu__list a:active { color: var(--copper-deep); }
+  @media (hover: hover) and (pointer: fine) { .catmenu__list a:hover { color: var(--copper-deep); padding-left: 0.5rem; } }
+  .catmenu__tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+  .catmenu__tile { display: block; }
+  .catmenu__tile .mat-photo { aspect-ratio: 1 / 1; }
+  .catmenu__tile .card__img { transition: transform var(--dur-hover-slow) var(--ease), opacity 700ms var(--ease); }
+  .catmenu__tile:active .card__img { transform: scale(1.03); }
+  @media (hover: hover) and (pointer: fine) { .catmenu__tile:hover .card__img { transform: scale(1.05); } }
+
+  /* ───── Полноэкранное меню и поиск ───── */
+  .menu__item {
+    display: flex;
+    min-height: 4rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    font-family: var(--font-display-stack);
+    font-size: clamp(1.75rem, 1.2rem + 2.4vw, 2.25rem);
+    letter-spacing: -0.015em;
+    transition: color var(--dur-hover) var(--ease);
+  }
+  .menu__item:active { color: var(--copper-deep); }
+  .menu__item[aria-current="page"] { color: var(--copper-deep); }
+  .menu__sub a {
+    display: flex;
+    min-height: var(--hit);
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.0625rem;
+    color: var(--text-soft);
+  }
+  .menu__sub a:active { color: var(--copper-deep); }
+
+  /* Поиск: на планшете и десктопе — карточка под шапкой, на телефоне — весь экран. */
+  .sheet[data-side="top"] {
+    margin: var(--space-3) auto auto;
+    width: min(100% - 2 * var(--gutter), 42rem);
+    max-height: calc(100dvh - 2 * var(--space-3));
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-hover);
+    opacity: 0;
+    translate: 0 -16px;
+  }
+  .sheet[data-side="top"][open] { opacity: 1; translate: 0 0; }
+  @starting-style { .sheet[data-side="top"][open] { opacity: 0; translate: 0 -16px; } }
+  @media (max-width: 767px) {
+    .sheet[data-side="top"] {
+      inset: 0;
+      margin: 0;
+      width: 100%;
+      height: 100dvh;
+      max-height: 100dvh;
+      border: 0;
+      border-radius: 0;
+    }
+  }
+  .search-hit {
+    display: flex;
+    min-height: 4.5rem;
+    align-items: center;
+    gap: var(--space-2);
+    padding-block: 0.5rem;
+    transition: background-color var(--dur-hover) var(--ease);
+  }
+  .search-hit__photo { position: relative; flex: none; width: 3.25rem; overflow: hidden; border-radius: var(--r-sm); background: var(--surface-deep); aspect-ratio: 4 / 5; }
+  .search-hit:active { background: var(--surface); }
+  @media (hover: hover) and (pointer: fine) { .search-hit:hover { background: var(--surface); } }
+
+  /* ───── Нижняя панель быстрых действий (только телефон) ───── */
+  .quickbar {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: var(--z-bar);
+    display: none;
+    padding: 0 var(--safe-r) var(--safe-b) var(--safe-l);
+    background: var(--header-glass);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    backdrop-filter: blur(14px) saturate(1.1);
+    border-top: 1px solid var(--border);
+  }
+  @media (max-width: 767px) { .quickbar { display: block; } }
+  .quickbar__list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); height: var(--bar-h); }
+  .quickbar__item {
+    position: relative;
+    display: flex;
+    min-width: var(--hit);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-size: 0.75rem;
+    line-height: 1.1;
+    color: var(--text-soft);
+    transition: color var(--dur-hover) var(--ease), background-color var(--dur-hover) var(--ease);
+  }
+  .quickbar__item:active { background: var(--surface); color: var(--text); }
+  .quickbar__item[aria-current="page"] { color: var(--moss-deep); }
+  .quickbar__icon { position: relative; display: grid; place-items: center; width: 1.75rem; height: 1.75rem; }
+  .quickbar__icon .badge { top: -4px; right: -8px; }
+  .quickbar__item[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 28%; right: 28%;
+    height: 2px;
+    border-radius: 0 0 2px 2px;
+    background: var(--copper-deep);
+  }
+
+  /* Подвал — тёмный, тёплый; ссылки с «выезжающим» подчёркиванием. */
+  .footer .u-link:active { color: var(--copper-light); }
+  @media (hover: hover) and (pointer: fine) { .footer .u-link:hover { color: var(--copper-light); } }
+}

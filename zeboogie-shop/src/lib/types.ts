@@ -24,6 +24,9 @@ export type ProductOption = {
 
 export type ProductCategory = { id: string; title: string };
 
+/** Метки на карточке. «new» вычисляется по дате публикации, «last» и «preorder» задаёт мастерская в слое curation. */
+export type ProductBadge = "new" | "last" | "preorder";
+
 export type Product = {
   /** Стабильный внутренний ключ вида `-123_456` (owner_id_item_id). Используется для дедупликации. */
   vkId: string;
@@ -44,6 +47,21 @@ export type Product = {
   vkUrl: string;
   /** Unix-время публикации в VK (секунды). */
   publishedAt: number;
+  /** CSS object-position обложки (кадрирование 4:5 не должно резать главное). Из слоя curation. */
+  focalPoint?: string;
+  /** Показывать в hero на главной; порядок — featuredOrder. Из слоя curation. */
+  featured?: boolean;
+  featuredOrder?: number;
+  /** Метки, заданные мастерской (слой curation). */
+  badges: ProductBadge[];
+  /** Число лайков VK, если сообщество его отдаёт. Нет данных — нет «популярных». */
+  popularity?: number;
+  /** Второе фото для показа при наведении в каталоге (по умолчанию — следующее после обложки). */
+  hoverImage?: string;
+  /** Снимки «в интерьере» (из слоя curation) — для блока на главной. */
+  interior?: { url: string; note?: string }[];
+  /** Обложка этой работы представляет свою подборку (плитки на главной, выпадающий «Каталог»). */
+  collectionCover?: boolean;
   /** removed — товар исчез из сообщества при последней полной синхронизации. */
   status: "active" | "removed";
   firstSeenAt: string;
@@ -56,6 +74,8 @@ export type Collection = {
   title: string;
   count: number;
   image?: string;
+  /** CSS object-position обложки подборки. */
+  imageFocal?: string;
 };
 
 /** Из VK берём только товары. Здесь — минимум, нужный для ссылок на сообщество (заказ, оригинал товара). */
@@ -96,10 +116,22 @@ export type SyncResult = {
 };
 
 /** Облегчённый снимок товара для корзины/избранного на клиенте. */
-export type ProductCard = Pick<
-  Product,
-  "vkId" | "slug" | "title" | "price" | "oldPrice" | "availability"
-> & { variant?: string; image: string | null; imageWidth?: number; imageHeight?: number; categoryTitle?: string; description: string };
+export type ProductCard = Pick<Product, "vkId" | "slug" | "title" | "price" | "oldPrice" | "availability"> & {
+  variant?: string;
+  image: string | null;
+  imageWidth?: number;
+  imageHeight?: number;
+  /** CSS object-position обложки. */
+  focalPoint?: string;
+  /** Второе фото — показывается при наведении на устройствах с hover. */
+  hoverImage?: string;
+  categoryId?: string;
+  categoryTitle?: string;
+  description: string;
+  badges?: ProductBadge[];
+  /** У товара есть выбираемые варианты — «в корзину» с карточки заменяется переходом на страницу товара. */
+  hasOptions?: boolean;
+};
 
 /** Ключ строки корзины: один товар с разными вариантами — разные строки. */
 export const lineKey = (c: Pick<ProductCard, "vkId" | "variant">) => (c.variant ? `${c.vkId}|${c.variant}` : c.vkId);

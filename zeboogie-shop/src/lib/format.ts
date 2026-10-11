@@ -56,3 +56,16 @@ export function itemIdFromSlug(slug: string): number | null {
 export function normalizeText(s: string): string {
   return s.toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ").trim();
 }
+
+/** Порядок размеров мастерской: по нему сортируются значения фильтра «Формат». */
+export const FORMAT_ORDER = ["XXS", "XS", "S", "M", "L", "XL", "XXL"];
+
+/**
+ * «Формат» берём из названия, где мастерская сама пишет размер: «Рамка XS», «Рама XL», «Рамка-полка широкая XXL».
+ * Это разбор названия, а не выдумка: если размера в названии нет — атрибута нет. Кириллическая «М» считается латинской M.
+ */
+export function deriveFormat(title: string): string | null {
+  const m = /(?:^|[\s(-])(XXS|XXL|XS|XL|S|M|L|М)(?=$|[\s),.*-])/.exec(title);
+  if (!m) return null;
+  return m[1] === "М" ? "M" : m[1];
+}

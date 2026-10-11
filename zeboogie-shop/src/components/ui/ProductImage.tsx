@@ -12,6 +12,12 @@ type Props = {
   priority?: boolean;
   /** Фото первого экрана попроще (например, первый ряд каталога): грузится сразу, без fade-in. */
   eager?: boolean;
+  /** Точка фокуса обложки (CSS object-position, например "50% 35%"): главное не должно уходить за край при кадрировании. */
+  focal?: string;
+  /** Качество кодирования next/image (по умолчанию 75). Для крупных фото — 82. */
+  quality?: number;
+  /** contain вместо cover: фото показывается целиком (страница товара). */
+  fit?: "cover" | "contain";
   className?: string;
 };
 
@@ -21,7 +27,7 @@ type Props = {
  * по событию load оно проявляется. Уже загруженные/кэшированные фото не мигают — их не прячем.
  * Если фото нет или оно не загрузилось, показывается спокойная заглушка, а не «битая» картинка.
  */
-export function ProductImage({ src, alt, sizes, priority, eager, className = "" }: Props) {
+export function ProductImage({ src, alt, sizes, priority, eager, focal, quality, fit = "cover", className = "" }: Props) {
   const ref = useCallback(
     (img: HTMLImageElement | null) => {
       if (img && !priority && !eager && !img.complete) img.dataset.loading = "true";
@@ -48,9 +54,11 @@ export function ProductImage({ src, alt, sizes, priority, eager, className = "" 
       sizes={sizes}
       loading={priority || eager ? "eager" : undefined}
       fetchPriority={priority ? "high" : undefined}
+      quality={quality}
       onLoad={settle}
       onError={settle}
-      className={`img-fade object-cover ${className}`}
+      style={focal ? { objectPosition: focal } : undefined}
+      className={`img-fade ${fit === "contain" ? "object-contain" : "object-cover"} ${className}`}
     />
   );
 }

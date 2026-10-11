@@ -1,0 +1,141 @@
+/*
+ * HERO: бренд + витрина лучших работ.
+ * Высота: телефон — вписывается в «экран минус шапка» (100dvh), десктоп — не выше ~85vh.
+ * Размер фото (--slide-h) считается от высоты окна, поэтому первый экран не режется на низких ноутбуках.
+ */
+@layer components {
+  .hero { --slide-gap: var(--space-2); padding-block: var(--space-2) var(--space-3); }
+  @media (min-width: 1024px) { .hero { --slide-gap: var(--space-3); padding-block: var(--space-3) var(--space-3); } }
+
+  .hero__intro { display: grid; gap: var(--space-2); }
+  @media (min-width: 1024px) {
+    .hero__intro { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: end; gap: var(--space-5); }
+  }
+  .hero__title {
+    margin-top: 0.5rem;
+    font-size: clamp(2.25rem, 1.2rem + 2.6vw, 3.75rem);
+    font-weight: 300;
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+  }
+  @media (min-width: 1024px) { .hero__title { white-space: nowrap; } }
+  .hero__lead { display: none; max-width: 28rem; font-size: 1.0625rem; line-height: 1.55; color: var(--text-soft); }
+  @media (min-width: 1024px) { .hero__lead { display: block; } }
+  .hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); margin-top: var(--space-1); }
+  @media (min-width: 1024px) { .hero__actions { margin-top: var(--space-2); } }
+
+  /* ───── Сцена ───── */
+  .hero__stage {
+    --slide-h: clamp(19rem, calc(100dvh - var(--top-offset) - var(--bar-h) - var(--safe-b) - 15rem), 32rem);
+    --slide-w: min(calc(var(--slide-h) * 0.8), 80vw);
+    position: relative;
+    margin-top: var(--space-1);
+  }
+  @media (min-width: 1024px) {
+    .hero__stage {
+      --slide-gap: var(--space-1);
+      --slide-h: clamp(19rem, min(calc(100dvh - var(--top-offset) - 16.5rem), calc(var(--hero-max) - 16.5rem)), 38rem);
+      margin-top: var(--space-2);
+    }
+  }
+  .hero__track {
+    display: flex;
+    gap: var(--slide-gap);
+    padding-inline: calc(50% - var(--slide-w) / 2);
+    padding-block: var(--space-1);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .hero__track::-webkit-scrollbar { display: none; }
+  @media (min-width: 1024px) {
+    /* По краям экрана дальние фото мягко растворяются */
+    .hero__track { mask-image: linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%); }
+  }
+  .hero__slide {
+    flex: 0 0 var(--slide-w);
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    transition: scale 700ms var(--ease), opacity 700ms var(--ease);
+    opacity: 0.8;
+    scale: 0.92;
+  }
+  .hero__slide[data-active="true"] { opacity: 1; scale: 1; }
+  @media (min-width: 1024px) { .hero__slide { scale: 0.82; opacity: 0.72; } .hero__slide[data-active="true"] { scale: 1; opacity: 1; } }
+  .hero__card { display: block; }
+  .hero__mat { display: block; box-shadow: var(--sh-soft); }
+  .hero__photo { aspect-ratio: 4 / 5; }
+  .hero__photo .hero-img { transition: transform var(--dur-hover-slow) var(--ease), opacity 700ms var(--ease); }
+  @media (hover: hover) and (pointer: fine) { .hero__card:hover .hero-img { transform: scale(1.03); } }
+  .hero__card:active .hero-img { transform: scale(1.02); }
+
+  /* Мягкий градиент под подписью: текст читается на любом фото */
+  .hero__shade { position: absolute; inset: auto 0 0 0; height: 62%; background: linear-gradient(to top, rgb(38 28 20 / 0.82) 0%, rgb(38 28 20 / 0.45) 45%, transparent 100%); pointer-events: none; }
+  .hero__caption { position: absolute; inset: auto 0 0 0; display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; padding: var(--space-2); color: var(--on-accent); }
+  .hero__no { font-size: 0.75rem; letter-spacing: 0.08em; opacity: 0.85; }
+  .hero__name { font-family: var(--font-display-stack); font-size: clamp(1.25rem, 1rem + 0.9vw, 1.75rem); line-height: 1.1; letter-spacing: -0.01em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .hero__price { font-size: 1rem; color: var(--on-accent); }
+  .hero__price > span { color: inherit; }
+  .hero__cta { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.4rem; font-size: 0.9rem; border-bottom: 1px solid rgb(247 241 231 / 0.55); padding-bottom: 2px; }
+  .hero__slide:not([data-active="true"]) .hero__cta { opacity: 0; }
+  .hero__cta { transition: opacity 500ms var(--ease); }
+
+  /* Стрелки: только на планшете и десктопе */
+  .hero__arrow {
+    position: absolute;
+    top: calc(var(--slide-h) / 2);
+    z-index: 3;
+    display: none;
+    width: var(--hit);
+    height: var(--hit);
+    place-items: center;
+    border-radius: 50%;
+    background: rgb(241 234 224 / 0.94);
+    border: 1px solid var(--border);
+    box-shadow: var(--sh-soft);
+    transition: background-color var(--dur-hover) var(--ease), transform var(--dur-hover) var(--ease);
+  }
+  .hero__arrow[data-dir="prev"] { left: max(var(--gutter), calc((100% - var(--container)) / 2)); }
+  .hero__arrow[data-dir="next"] { right: max(var(--gutter), calc((100% - var(--container)) / 2)); }
+  .hero__arrow:active { transform: scale(0.94); background: var(--surface); }
+  @media (min-width: 768px) { .hero__arrow { display: grid; } }
+  @media (hover: hover) and (pointer: fine) { .hero__arrow:hover { background: var(--bg); } }
+
+  /* Точки (вкладки) и пауза: зона нажатия 44×44, видимая точка — маленькая */
+  .hero__controls { display: flex; align-items: center; justify-content: center; gap: var(--space-1); margin-top: 0.25rem; }
+  .hero__dots { display: flex; align-items: center; }
+  .hero__dot { position: relative; display: grid; width: var(--hit); height: var(--hit); place-items: center; }
+  .hero__dot::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--border-strong);
+    opacity: 0.55;
+    transition: width 420ms var(--ease), opacity 420ms var(--ease), background-color 420ms var(--ease);
+  }
+  .hero__dot[aria-selected="true"]::before { width: 1.5rem; background: var(--copper-deep); opacity: 1; }
+  .hero__dot:active::before { opacity: 1; }
+  @media (hover: hover) and (pointer: fine) { .hero__dot:hover::before { opacity: 1; } }
+  .hero__pause { display: grid; width: var(--hit); height: var(--hit); place-items: center; border-radius: 50%; color: var(--text-soft); transition: background-color var(--dur-hover) var(--ease); }
+  .hero__pause:active { background: var(--surface-deep); }
+  @media (hover: hover) and (pointer: fine) { .hero__pause:hover { background: var(--surface); color: var(--text); } }
+}
+
+/* ───── Главная: плитки подборок, «В интерьере» ───── */
+@layer components {
+  .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+  @media (min-width: 768px) { .tiles { gap: var(--space-3); } }
+  @media (min-width: 1024px) { .tiles[data-count="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); } .tiles[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .tile { display: block; }
+  .tile__photo { aspect-ratio: 4 / 5; }
+  .tile__shade { position: absolute; inset: auto 0 0 0; height: 55%; background: linear-gradient(to top, rgb(38 28 20 / 0.78), transparent); pointer-events: none; }
+  .tile__text { position: absolute; inset: auto 0 0 0; display: flex; flex-direction: column; gap: 0.2rem; padding: var(--space-2); color: var(--on-accent); }
+  .tile__title { font-family: var(--font-display-stack); font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem); line-height: 1.08; letter-spacing: -0.01em; }
+  .tile__count { font-size: 0.8125rem; opacity: 0.9; }
+
+  .interior { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3) var(--space-2); }
+  @media (min-width: 1024px) { .interior[data-count="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); } .interior[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .interior__photo { aspect-ratio: 4 / 5; }
+}

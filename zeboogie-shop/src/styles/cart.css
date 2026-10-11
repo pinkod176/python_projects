@@ -1,0 +1,63 @@
+/*
+ * КОРЗИНА И ОФОРМЛЕНИЕ: мини-корзина (шторка справа), строки, страница корзины, пошаговое оформление.
+ */
+@layer components {
+  /* Мини-корзина: ширина и высота задаёт .sheet[data-side="right"] */
+  .drawer { background: var(--bg); }
+  .cart-line { display: flex; gap: var(--space-2); padding-block: var(--space-3); }
+  .cart-line__photo { display: block; flex: none; align-self: flex-start; padding: 4px; }
+
+  /* ───── Страница корзины ───── */
+  .cart-layout { display: grid; gap: var(--space-4); }
+  @media (min-width: 1024px) { .cart-layout { grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: var(--space-5); align-items: start; } }
+  .summary {
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+  }
+  @media (min-width: 1024px) { .summary { position: sticky; top: calc(var(--header-h) + var(--space-3)); padding: var(--space-4); } }
+
+  /* ───── Пошаговое оформление ───── */
+  .steps { display: flex; align-items: center; gap: var(--hit-gap); }
+  .steps__item { display: flex; min-width: 0; flex: 1; align-items: center; gap: 0.6rem; }
+  .steps__item:not(:last-child)::after { content: ""; flex: 1; height: 1px; margin-inline: 0.5rem; background: var(--border-strong); opacity: 0.5; transform-origin: left; transition: background-color var(--dur-hover) var(--ease), opacity var(--dur-hover) var(--ease); }
+  .steps__item[data-done="true"]:not(:last-child)::after { background: var(--moss); opacity: 1; }
+  .steps__btn { display: inline-flex; min-height: var(--hit); align-items: center; gap: 0.6rem; text-align: left; }
+  .steps__num {
+    display: grid;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    transition: background-color 380ms var(--ease), border-color 380ms var(--ease), color 380ms var(--ease);
+  }
+  .steps__item[data-state="active"] .steps__num { background: var(--moss); border-color: var(--moss); color: var(--on-accent); }
+  .steps__item[data-state="done"] .steps__num { background: var(--surface); border-color: var(--moss); color: var(--moss-deep); }
+  .steps__label { font-size: 0.9375rem; color: var(--text-soft); transition: color var(--dur-hover) var(--ease); }
+  .steps__item[data-state="active"] .steps__label { color: var(--text); font-weight: 500; }
+  @media (max-width: 639px) { .steps__label { display: none; } .steps__item[data-state="active"] .steps__label { display: inline; } .steps__item:not(:last-child)::after { margin-inline: 0.25rem; } }
+
+  .step-panel { animation: step-in 480ms var(--ease) both; }
+  @keyframes step-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+
+  .checkout-bar {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: var(--z-bar);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0.5rem calc(var(--gutter) + var(--safe-r)) calc(0.5rem + var(--safe-b)) calc(var(--gutter) + var(--safe-l));
+    background: var(--header-glass);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    backdrop-filter: blur(14px) saturate(1.1);
+    border-top: 1px solid var(--border);
+  }
+  @media (min-width: 1024px) { .checkout-bar { display: none; } }
+  @media (max-width: 1023px) { body:has(.checkout-bar) { padding-bottom: calc(5rem + var(--safe-b)); } }
+}

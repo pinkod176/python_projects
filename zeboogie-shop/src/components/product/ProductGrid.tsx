@@ -13,14 +13,18 @@ type Props = {
   headingLevel?: 2 | 3;
   /** Показывать номера «№01». */
   numbered?: boolean;
-  /** На телефоне — горизонтальная лента вместо длинной колонки. */
-  rail?: boolean;
+  /** «Крупные карточки»: на одну колонку меньше. */
+  view?: "grid" | "large";
+  /** На телефоне показывать не больше N карточек (остальные скрыты CSS): короткие витрины на главной. */
+  trimOnPhone?: number;
+  /** Открыта боковая панель фильтров: на ноутбуке 1200–1279 px колонок три, а не четыре. */
+  sidebar?: boolean;
 };
 
-/** Сетка 4 → 3 → 2 → 1 колонка (см. .product-grid). Карточки появляются каскадом: задержка (индекс % 4) × 70 мс. */
-export function ProductGrid({ items, startIndex = 0, priorityCount = 0, firstRow = false, numbered = true, rail = false, headingLevel = 3 }: Props) {
+/** Сетка 2 → 3 → 4 колонки (см. .product-grid). Карточки появляются каскадом: задержка (индекс % 4) × 70 мс. */
+export function ProductGrid({ items, startIndex = 0, priorityCount = 0, firstRow = false, numbered = true, view = "grid", trimOnPhone, sidebar, headingLevel = 3 }: Props) {
   return (
-    <ul className={`product-grid${rail ? " product-grid--rail relative" : ""}`}>
+    <ul className="product-grid" data-view={view} data-trim={trimOnPhone} data-cols-lg={sidebar ? "3" : undefined}>
       {items.map((c, i) => (
         <Reveal key={c.vkId} as="li" className="min-w-0" delay={(i % 4) * 70} first={firstRow && i < 4} soft={firstRow && i < 4}>
           <ProductCard
@@ -36,9 +40,9 @@ export function ProductGrid({ items, startIndex = 0, priorityCount = 0, firstRow
   );
 }
 
-export function ProductGridSkeleton({ count = 4 }: { count?: number }) {
+export function ProductGridSkeleton({ count = 4, view = "grid" }: { count?: number; view?: "grid" | "large" }) {
   return (
-    <ul className="product-grid" aria-hidden>
+    <ul className="product-grid" data-view={view} aria-hidden>
       {Array.from({ length: count }).map((_, i) => (
         <li key={i}>
           <div className="mat">
