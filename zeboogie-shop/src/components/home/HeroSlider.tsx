@@ -20,7 +20,7 @@ const AUTOPLAY_MS = 6500;
 export function HeroSlider({ slides }: { slides: ProductCard[] }) {
   const id = useId();
   const root = useRef<HTMLElement>(null);
-  const track = useRef<HTMLUListElement>(null);
+  const track = useRef<HTMLDivElement>(null);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const n = slides.length;
   const loop = n > 1;
@@ -32,7 +32,9 @@ export function HeroSlider({ slides }: { slides: ProductCard[] }) {
   const [focused, setFocused] = useState(false);
   const [inView, setInView] = useState(true);
   const [visible, setVisible] = useState(true);
-  const [reduced, setReduced] = useState(true); // пока не знаем — не крутим
+  // До первого замера считаем, что анимации разрешены: так кнопка «Пауза» есть уже в серверной разметке и страница не «прыгает».
+  // Автоплей всё равно стартует не раньше чем через 6,5 с, а к тому моменту prefers-reduced-motion уже прочитан.
+  const [reduced, setReduced] = useState(false);
   const current = n ? ((abs % n) + n) % n : 0;
 
   const step = useCallback(() => {
@@ -156,18 +158,18 @@ export function HeroSlider({ slides }: { slides: ProductCard[] }) {
       onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setFocused(false)}
       onTouchStart={() => setUserPaused(true)}
     >
-      <ul ref={track} className="hero__track no-scrollbar" id={`${id}-track`}>
+      <div ref={track} className="hero__track no-scrollbar" id={`${id}-track`}>
         {items.map((s, i) => {
           const k = i % n;
           const real = !loop || (i >= base && i < base + n); // средняя копия — «настоящая», остальные — двойники для зацикливания
           return (
-            <li
+            <div
               key={`${s.vkId}-${i}`}
               id={real ? `${id}-slide-${k}` : undefined}
               className="hero__slide reveal-load reveal-soft"
               style={{ "--reveal-delay": `${120 + k * 90}ms` } as CSSProperties}
               data-active={i === abs}
-              role={real ? "group" : "presentation"}
+              role={real ? "group" : undefined}
               aria-roledescription={real ? "слайд" : undefined}
               aria-label={real ? `${k + 1} из ${n}` : undefined}
               aria-hidden={real ? undefined : true}
@@ -182,7 +184,7 @@ export function HeroSlider({ slides }: { slides: ProductCard[] }) {
                       sizes="(min-width:1024px) 24rem, 82vw"
                       quality={82}
                       priority={i === base}
-                      eager={i === base + 1 || (loop && i === base - 1)}
+                      lowPriority={i !== base}
                       className="hero-img"
                     />
                     <span className="hero__shade" aria-hidden />
@@ -197,10 +199,10 @@ export function HeroSlider({ slides }: { slides: ProductCard[] }) {
                   </span>
                 </span>
               </Link>
-            </li>
+            </div>
           );
         })}
-      </ul>
+      </div>
 
       {loop && (
         <>

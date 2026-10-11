@@ -35,7 +35,7 @@ export function CardMedia({ href, image, hoverImage, focal, badges = [], unavail
       className="card__photo mat-photo"
       onPointerEnter={(e) => e.pointerType === "mouse" && hoverImage && setWarm(true)}
     >
-      <ProductImage src={image} alt="" focal={focal} sizes={sizes} priority={priority} eager={eager} className="card__img" />
+      <ProductImage src={image} alt="" focal={focal} sizes={sizes} priority={priority} eager={eager} lowPriority={eager} className="card__img" />
       {warm && hoverImage && hoverImage !== image && (
         <ProductImage src={hoverImage} alt="" sizes={sizes} className="card__img card__img--hover" />
       )}

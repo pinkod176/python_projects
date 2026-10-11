@@ -36,7 +36,6 @@ export function CatalogBrowser({ initial, initialParams }: { initial: CatalogRes
   const sidebarPref = usePref("zb:sidebar", "open") !== "closed";
   const isWide = useMedia("(min-width: 1200px)");
   const reqId = useRef(0);
-  const first = useRef(true);
   const live = useRef({ key: toPageQuery(initialParams), pages: initial.page });
 
   const fetchPage = useCallback(async (p: UiParams, page: number, append: boolean) => {
@@ -55,13 +54,14 @@ export function CatalogBrowser({ initial, initialParams }: { initial: CatalogRes
   }, []);
 
   // Любое изменение фильтров: обновляем адрес (без перезагрузки) и запрашиваем данные. Ввод цены — с задержкой.
+  // Сравниваем с уже загруженным запросом, а не «пропускаем первый запуск»: так двойной запуск эффектов в dev (StrictMode)
+  // не перезагружает список и не затирает дозагруженные страницы.
+  const loadedKey = useRef(toPageQuery(initialParams));
   useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      return;
-    }
+    const qs = toPageQuery(params);
+    if (qs === loadedKey.current) return;
     const t = setTimeout(() => {
-      const qs = toPageQuery(params);
+      loadedKey.current = qs;
       live.current = { key: qs, pages: 1 };
       window.history.replaceState(window.history.state, "", qs ? `/catalog?${qs}` : "/catalog");
       void fetchPage(params, 1, false);
@@ -76,7 +76,10 @@ export function CatalogBrowser({ initial, initialParams }: { initial: CatalogRes
   // Возврат из карточки товара: дозагружаем те же страницы и возвращаем прокрутку; пока листаем — помним, где мы.
   useEffect(() => {
     let timer = 0;
-    const save = () => saveCatalogRestore({ key: live.current.key, pages: live.current.pages, y: window.scrollY });
+    // Не перезаписываем сохранённое после ухода со страницы: роутер сбрасывает прокрутку в 0 уже на адресе товара.
+    const save = () => {
+      if (window.location.pathname === "/catalog") saveCatalogRestore({ key: live.current.key, pages: live.current.pages, y: window.scrollY });
+    };
     const onScroll = () => {
       if (!timer) timer = window.setTimeout(() => { timer = 0; save(); }, 250);
     };
@@ -98,7 +101,17 @@ export function CatalogBrowser({ initial, initialParams }: { initial: CatalogRes
         } catch {
           /* вернём только прокрутку */
         }
-        if (!cancelled) requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo({ top: saved.y, behavior: "instant" })));
+        if (cancelled) return;
+        // Роутер Next после перехода «назад» сам может прокрутить страницу вверх уже после нашей прокрутки,
+        // поэтому возвращаем позицию несколько раз, пока человек сам не начал листать.
+        let touched = false;
+        const stop = () => { touched = true; };
+        for (const ev of ["wheel", "touchstart", "keydown", "pointerdown"] as const) window.addEventListener(ev, stop, { once: true, passive: true });
+        const apply = () => {
+          if (!touched && Math.abs(window.scrollY - saved.y) > 24) window.scrollTo({ top: saved.y, behavior: "instant" });
+        };
+        requestAnimationFrame(() => requestAnimationFrame(apply));
+        for (const ms of [120, 350, 800, 1500]) window.setTimeout(apply, ms);
       })();
     }
     return () => {

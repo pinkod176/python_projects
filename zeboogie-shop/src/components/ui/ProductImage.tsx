@@ -12,6 +12,8 @@ type Props = {
   priority?: boolean;
   /** Фото первого экрана попроще (например, первый ряд каталога): грузится сразу, без fade-in. */
   eager?: boolean;
+  /** Видимое, но не главное фото (соседи в hero): грузится после главного, не отнимая у него канал. */
+  lowPriority?: boolean;
   /** Точка фокуса обложки (CSS object-position, например "50% 35%"): главное не должно уходить за край при кадрировании. */
   focal?: string;
   /** Качество кодирования next/image (по умолчанию 75). Для крупных фото — 82. */
@@ -27,7 +29,7 @@ type Props = {
  * по событию load оно проявляется. Уже загруженные/кэшированные фото не мигают — их не прячем.
  * Если фото нет или оно не загрузилось, показывается спокойная заглушка, а не «битая» картинка.
  */
-export function ProductImage({ src, alt, sizes, priority, eager, focal, quality, fit = "cover", className = "" }: Props) {
+export function ProductImage({ src, alt, sizes, priority, eager, lowPriority, focal, quality, fit = "cover", className = "" }: Props) {
   const ref = useCallback(
     (img: HTMLImageElement | null) => {
       if (img && !priority && !eager && !img.complete) img.dataset.loading = "true";
@@ -53,7 +55,7 @@ export function ProductImage({ src, alt, sizes, priority, eager, focal, quality,
       fill
       sizes={sizes}
       loading={priority || eager ? "eager" : undefined}
-      fetchPriority={priority ? "high" : undefined}
+      fetchPriority={priority ? "high" : lowPriority ? "low" : undefined}
       quality={quality}
       onLoad={settle}
       onError={settle}

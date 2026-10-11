@@ -41,7 +41,7 @@ export function ProductRail({ items, label }: { items: Card[]; label: string }) 
   const go = (dir: 1 | -1) => track.current?.scrollBy({ left: dir * track.current.clientWidth * 0.85, behavior: "smooth" });
 
   return (
-    <div className="rail" role="region" aria-roledescription="карусель" aria-label={label}>
+    <div className="rail" role="group" aria-roledescription="карусель" aria-label={`Лента: ${label}`}>
       <ul ref={track} className="rail__track">
         {items.map((c) => (
           <li key={c.vkId}>

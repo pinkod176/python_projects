@@ -12,13 +12,15 @@
     .hero__intro { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: end; gap: var(--space-5); }
   }
   .hero__title {
+    /* Место под две строки резервируем заранее: когда подгружается шрифт, всё под заголовком не сдвигается. */
+    min-height: calc(2 * 0.98em);
     margin-top: 0.5rem;
     font-size: clamp(2.25rem, 1.2rem + 2.6vw, 3.75rem);
     font-weight: 300;
     line-height: 0.98;
     letter-spacing: -0.03em;
   }
-  @media (min-width: 1024px) { .hero__title { white-space: nowrap; } }
+  @media (min-width: 1024px) { .hero__title { min-height: 0.98em; white-space: nowrap; } }
   .hero__lead { display: none; max-width: 28rem; font-size: 1.0625rem; line-height: 1.55; color: var(--text-soft); }
   @media (min-width: 1024px) { .hero__lead { display: block; } }
   .hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); margin-top: var(--space-1); }

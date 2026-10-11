@@ -233,7 +233,7 @@
     z-index: var(--z-bar);
     display: none;
     padding: 0 var(--safe-r) var(--safe-b) var(--safe-l);
-    background: var(--header-glass);
+    background: var(--bar-glass);
     -webkit-backdrop-filter: blur(14px) saturate(1.1);
     backdrop-filter: blur(14px) saturate(1.1);
     border-top: 1px solid var(--border);

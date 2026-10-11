@@ -53,7 +53,7 @@
     align-items: center;
     gap: var(--space-2);
     padding: 0.5rem calc(var(--gutter) + var(--safe-r)) calc(0.5rem + var(--safe-b)) calc(var(--gutter) + var(--safe-l));
-    background: var(--header-glass);
+    background: var(--bar-glass);
     -webkit-backdrop-filter: blur(14px) saturate(1.1);
     backdrop-filter: blur(14px) saturate(1.1);
     border-top: 1px solid var(--border);

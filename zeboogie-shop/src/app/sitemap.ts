@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (isDemo()) return [];
   const site = getEnv().SITE_URL;
   const state = await getCatalogState();
-  const pages: MetadataRoute.Sitemap = [{ url: site }, { url: `${site}/catalog` }, { url: `${site}/about` }];
+  const pages: MetadataRoute.Sitemap = [{ url: site }, { url: `${site}/catalog` }, { url: `${site}/about` }, { url: `${site}/delivery` }, { url: `${site}/contacts` }];
   if (state.status !== "ok") return pages;
   return [
     ...pages,
