@@ -77,8 +77,8 @@ GfontConverter.exe --cli шрифт.ttf out.gfont --template ...       (CLI вн
 
 | Проверка | Результат |
 |---|---|
-| `build_exe.bat ci`: venv, зависимости, 32 теста на Windows, PyInstaller | OK |
-| Размер `GfontConverter.exe` | ≈ 103 МБ (почти всё — Qt, numpy, scipy) |
+| `build_exe.bat ci`: venv, зависимости, все тесты на Windows, PyInstaller | OK |
+| Размер `GfontConverter.exe` | 99 170 387 байт ≈ 95 МБ (почти всё — Qt, numpy, scipy) |
 | exe скопирован в папку `Чистый запуск с пробелом`, PATH = только `C:\Windows`: `--selftest` и `--smoke-gui` (сохранение в `смоук тест\Arial_1.gfont`) | OK |
 | Обычный запуск окна (платформа Qt `windows`), 25 с работы, снимок экрана | OK |
 | Контейнер Windows Server Core **без Python** (`python отсутствует`): `--selftest` и `--smoke-gui` | OK |
