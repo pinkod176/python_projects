@@ -65,3 +65,17 @@ def test_session_glyph_and_convert(tmp_path, test_font, template_path):
     # то, что показал предпросмотр, побайтово совпадает с записанным в файл
     gf = read_gfont(out)
     assert gf.strokes(ord("щ")) == s.glyph(ord("щ"), p).strokes
+
+
+def test_settings_roundtrip(tmp_path):
+    from gui.settings import AppSettings
+    p = tmp_path / "Профиль пользователя" / "settings.json"
+    s = AppSettings(p)
+    s["last_font"] = r"C:\Шрифты\мой шрифт 字.ttf"
+    s["params"] = UiParams(slant=5).to_dict()
+    s.save()
+    t = AppSettings(p)
+    assert t["last_font"] == r"C:\Шрифты\мой шрифт 字.ttf"
+    assert UiParams.from_dict(t["params"]).slant == 5
+    p.write_text("{испорчено", encoding="utf-8")
+    assert AppSettings(p)["pen_width"] == 9.0      # испорченный файл -> значения по умолчанию

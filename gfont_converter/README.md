@@ -73,6 +73,20 @@ GfontConverter.exe --cli шрифт.ttf out.gfont --template ...       (CLI вн
 запускается без Python в PATH и в чистом контейнере Windows Server Core, где Python нет вообще.
 Готовый exe можно скачать на странице запуска workflow (артефакт `GfontConverter-exe`).
 
+### Что проверено автоматически (GitHub Actions, windows-2022)
+
+| Проверка | Результат |
+|---|---|
+| `build_exe.bat ci`: venv, зависимости, 32 теста на Windows, PyInstaller | OK |
+| Размер `GfontConverter.exe` | ≈ 103 МБ (почти всё — Qt, numpy, scipy) |
+| exe скопирован в папку `Чистый запуск с пробелом`, PATH = только `C:\Windows`: `--selftest` и `--smoke-gui` (сохранение в `смоук тест\Arial_1.gfont`) | OK |
+| Обычный запуск окна (платформа Qt `windows`), 25 с работы, снимок экрана | OK |
+| Контейнер Windows Server Core **без Python** (`python отсутствует`): `--selftest` и `--smoke-gui` | OK |
+
+Не проверено: живой человек в окне на Windows 10/11 с HiDPI-экраном (масштаб 125–200 %)
+и работа рядом с антивирусом. Exe не подписан цифровой подписью, поэтому Windows
+SmartScreen может предупредить при первом запуске («Подробнее» → «Выполнить в любом случае»).
+
 ## CLI: установка из исходников (Windows)
 
 1. Установите Python 3.10+ с python.org (при установке отметьте «Add python.exe to PATH»).
