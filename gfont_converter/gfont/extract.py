@@ -12,8 +12,10 @@
 
 from __future__ import annotations
 
+import io
 import math
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
@@ -109,13 +111,43 @@ class FlattenPen(BasePen):
 class FontSource:
     """Открытый шрифт: cmap, контуры, метрики."""
 
-    def __init__(self, path: str, font_number: int = 0):
-        self.path = path
-        self.font = TTFont(path, fontNumber=font_number, lazy=False)
-        self.cmap: Dict[int, str] = self.font.getBestCmap() or {}
-        self.glyphset = self.font.getGlyphSet()
-        self.upm = self.font["head"].unitsPerEm
+    def __init__(self, path, font_number: int = 0):
+        from .errors import UserError, describe_os_error
+        self.path = str(path)
+        self.font_number = font_number
+        p = Path(path)
+        if not p.is_file():
+            raise UserError(f"Файл шрифта не найден: «{p}».")
+        try:
+            # открываем по объекту файла: надёжно для путей с кириллицей и иероглифами
+            with p.open("rb") as f:
+                data = io.BytesIO(f.read())
+        except OSError as exc:
+            raise UserError(describe_os_error(exc, p, "прочитать")) from exc
+        try:
+            self.font = TTFont(data, fontNumber=font_number, lazy=False)
+            self.cmap: Dict[int, str] = self.font.getBestCmap() or {}
+            self.glyphset = self.font.getGlyphSet()
+            self.upm = self.font["head"].unitsPerEm
+        except Exception as exc:  # fontTools бросает самые разные исключения
+            raise UserError(f"Не удалось прочитать шрифт «{p.name}»: файл повреждён или это не "
+                            f"TTF/OTF/WOFF ({type(exc).__name__}: {exc}).") from exc
+        if not self.cmap:
+            raise UserError(f"В шрифте «{p.name}» нет таблицы символов (cmap) — "
+                            "нечего конвертировать.")
         self.hmtx = self.font["hmtx"] if "hmtx" in self.font else None
+
+    @property
+    def family_name(self) -> str:
+        try:
+            name = self.font["name"]
+            for nid in (4, 1):
+                rec = name.getDebugName(nid)
+                if rec:
+                    return rec
+        except Exception:
+            pass
+        return Path(self.path).stem
 
     def has(self, code: int) -> bool:
         return code in self.cmap

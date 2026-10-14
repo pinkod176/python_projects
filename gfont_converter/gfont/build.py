@@ -3,18 +3,20 @@
 from __future__ import annotations
 
 import json
+import multiprocessing
 import os
 import sys
 import time
 import unicodedata
 from concurrent.futures import ProcessPoolExecutor
-from dataclasses import asdict, dataclass, field
-from typing import Dict, List, Optional, Tuple
+from dataclasses import asdict, astuple, dataclass, field, replace
+from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
 
 from .charset import FALLBACKS, is_core, parse_charset
 from .extract import ExtractParams, FontSource, GlyphShape, extract_glyph, is_single_line_font
+from .errors import Cancelled, UserError
 from .format import GFont, read_gfont
 from .normalize import TargetMetrics, font_scale, measure_font, place_glyph
 from .validate import ValidationReport, validate_file
@@ -39,6 +41,11 @@ class ConvertOptions:
     font_number: int = 0
     metrics: TargetMetrics = field(default_factory=TargetMetrics)
     extract: ExtractParams = field(default_factory=ExtractParams)
+    # --- для GUI (CLI их не задаёт) ---
+    source: Optional[FontSource] = None    # уже открытый шрифт
+    shape_cache: Optional[dict] = None     # кэш извлечённых форм (см. extract_shapes)
+    progress: Optional[Callable[[int, int], None]] = None
+    cancel: Optional[Callable[[], bool]] = None
 
 
 @dataclass
@@ -127,24 +134,104 @@ def _worker(args) -> Tuple[int, GlyphShape]:
     return code, extract_glyph(_W["src"], src_code, mode, cap, params)
 
 
+def _check(cancel) -> None:
+    if cancel is not None and cancel():
+        raise Cancelled()
+
+
+def resolve_mode(src: FontSource, mode: str) -> str:
+    if mode == "auto":
+        return "outline" if is_single_line_font(src) else "skeleton"
+    return mode
+
+
+def effective_extract_params(p: ExtractParams, tm: TargetMetrics, s: float) -> ExtractParams:
+    """Параметры извлечения с вычисленным шагом колец заливки (зависит от масштаба)."""
+    q = replace(p)
+    if q.fill_spacing <= 0:
+        q.fill_spacing = tm.fill_spacing / s
+    return q
+
+
+def shape_key(src_code: int, mode: str, params: ExtractParams) -> tuple:
+    return (src_code, mode) + astuple(params)
+
+
+def extract_shapes(src: FontSource, src_codes: Iterable[int], mode: str, cap: float,
+                   params: ExtractParams, *, jobs: int = 0, cache: Optional[dict] = None,
+                   progress=None, cancel=None, log=print) -> Dict[int, GlyphShape]:
+    """Извлечь формы глифов (самая дорогая часть). Общая для CLI и GUI.
+
+    cache: словарь shape_key -> GlyphShape; найденное берётся из него, новое кладётся в него.
+    progress(done, total) и cancel() -> bool вызываются между глифами.
+    """
+    src_codes = list(src_codes)
+    out: Dict[int, GlyphShape] = {}
+    todo = []
+    for sc in src_codes:
+        key = shape_key(sc, mode, params)
+        if cache is not None and key in cache:
+            out[sc] = cache[key]
+        else:
+            todo.append(sc)
+    total = len(src_codes)
+    done = total - len(todo)
+    if progress:
+        progress(done, total)
+
+    def put(sc, shape):
+        nonlocal done
+        out[sc] = shape
+        if cache is not None:
+            cache[shape_key(sc, mode, params)] = shape
+        done += 1
+        if progress:
+            progress(done, total)
+        elif done % 50 == 0:
+            log(f"  {done}/{total}")
+
+    n_jobs = jobs if jobs > 0 else min(8, os.cpu_count() or 1)
+    if n_jobs > 1 and len(todo) > 20:
+        tasks = [(sc, sc, mode, cap, params) for sc in todo]
+        # spawn везде (как на Windows): fork из многопоточного процесса (GUI) небезопасен
+        ex = ProcessPoolExecutor(max_workers=n_jobs, initializer=_worker_init,
+                                 initargs=(src.path, getattr(src, "font_number", 0)),
+                                 mp_context=multiprocessing.get_context("spawn"))
+        try:
+            for sc, shape in ex.map(_worker, tasks, chunksize=4):
+                put(sc, shape)
+                _check(cancel)
+        except Cancelled:
+            ex.shutdown(wait=False, cancel_futures=True)
+            raise
+        else:
+            ex.shutdown(wait=True)
+    else:
+        for sc in todo:
+            _check(cancel)
+            put(sc, extract_glyph(src, sc, mode, cap, params))
+    return out
+
+
 def convert(opts: ConvertOptions, log=print) -> ConvertReport:
     t0 = time.time()
+    cancel = opts.cancel
     rep = ConvertReport()
     gf = read_gfont(opts.template)
     rep.template_entries = len(gf.entries)
-    src = FontSource(opts.font, opts.font_number)
+    src = opts.source or FontSource(opts.font, opts.font_number)
     fm = measure_font(src)
     rep.font_metrics = asdict(fm)
     s = font_scale(fm, opts.metrics)
     rep.scale = s
-    mode = opts.mode
-    if mode == "auto":
-        mode = "outline" if is_single_line_font(src) else "skeleton"
+    mode = resolve_mode(src, opts.mode)
     rep.mode = mode
-    if opts.extract.fill_spacing <= 0:
-        opts.extract.fill_spacing = opts.metrics.fill_spacing / s
+    opts.extract = effective_extract_params(opts.extract, opts.metrics, s)
 
     codes = parse_charset(opts.charset)
+    if not any(src.has(c) for c in codes):
+        raise UserError("В шрифте нет ни одного символа из выбранного набора. "
+                        "Выберите другой набор символов или другой шрифт.")
     jobs: List[Tuple[int, int]] = []
     for code in codes:
         src_code = code if src.has(code) else None
@@ -163,24 +250,16 @@ def convert(opts: ConvertOptions, log=print) -> ConvertReport:
         jobs.append((code, src_code))
 
     log(f"Символов к обработке: {len(jobs)} (режим {mode})")
-    shapes: Dict[int, GlyphShape] = {}
-    tasks = [(c, sc, mode, fm.cap, opts.extract) for c, sc in jobs]
-    n_jobs = opts.jobs if opts.jobs > 0 else min(8, os.cpu_count() or 1)
-    if n_jobs > 1 and len(tasks) > 20:
-        with ProcessPoolExecutor(max_workers=n_jobs, initializer=_worker_init,
-                                 initargs=(opts.font, opts.font_number)) as ex:
-            for i, (code, shape) in enumerate(ex.map(_worker, tasks, chunksize=4), 1):
-                shapes[code] = shape
-                if i % 50 == 0:
-                    log(f"  {i}/{len(tasks)}")
-    else:
-        for i, (code, sc, md, cap, prm) in enumerate(tasks, 1):
-            shapes[code] = extract_glyph(src, sc, md, cap, prm)
-            if i % 50 == 0:
-                log(f"  {i}/{len(tasks)}")
+    _check(cancel)
+    by_src = extract_shapes(src, sorted({sc for _, sc in jobs}), mode, fm.cap, opts.extract,
+                            jobs=opts.jobs, cache=opts.shape_cache, progress=opts.progress,
+                            cancel=cancel, log=log)
+    shapes: Dict[int, GlyphShape] = {c: by_src[sc] for c, sc in jobs}
+    _check(cancel)
 
     produced: List[int] = []
     for code, _ in jobs:
+        _check(cancel)
         shape = shapes[code]
         rng = np.random.default_rng([opts.seed, code]) if opts.variation > 0 else None
         strokes = place_glyph(shape, s, opts.metrics, opts.variation, rng) if not shape.empty else []
@@ -214,8 +293,7 @@ def convert(opts: ConvertOptions, log=print) -> ConvertReport:
         else:
             rep.untouched_noncjk.append(c)
 
-    out_dir = os.path.dirname(os.path.abspath(opts.output))
-    os.makedirs(out_dir, exist_ok=True)
+    _check(cancel)
     gf.save(opts.output)
     rep.total_entries = len(gf.entries)
     required = [c for c in produced if is_core(c)]

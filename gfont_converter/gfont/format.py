@@ -25,10 +25,12 @@ ZIP пишется собственным кодом, чтобы нетрону�
 from __future__ import annotations
 
 import math
+import os
 import struct
 import time
 import zlib
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 Point = Tuple[float, float]
@@ -284,10 +286,22 @@ class GFont:
             head += r
         return bytes(head) + build_zip(self.entries.values(), level)
 
-    def save(self, path: str, level: int = 6) -> None:
+    def save(self, path, level: int = 6) -> None:
+        """Атомарная запись: сначала во временный файл рядом, потом замена."""
+        from .errors import UserError, describe_os_error
+        target = Path(path)
         data = self.to_bytes(level)
-        with open(path, "wb") as f:
-            f.write(data)
+        tmp = target.with_name(target.name + ".tmp")
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            tmp.write_bytes(data)
+            os.replace(tmp, target)
+        except OSError as exc:
+            try:
+                tmp.unlink()
+            except OSError:
+                pass
+            raise UserError(describe_os_error(exc, target)) from exc
 
 
 def parse_gfont(buf: bytes) -> GFont:
@@ -320,9 +334,17 @@ def parse_gfont(buf: bytes) -> GFont:
     return GFont(version=version, opaque=opaque, prefix=prefix, entries=entries)
 
 
-def read_gfont(path: str) -> GFont:
-    with open(path, "rb") as f:
-        return parse_gfont(f.read())
+def read_gfont(path) -> GFont:
+    from .errors import UserError, describe_os_error
+    p = Path(path)
+    try:
+        data = p.read_bytes()
+    except OSError as exc:
+        raise UserError(describe_os_error(exc, p, "прочитать")) from exc
+    try:
+        return parse_gfont(data)
+    except (GFontError, struct.error, zlib.error) as exc:
+        raise UserError(f"Файл «{p}» не похож на .gfont или повреждён: {exc}") from exc
 
 
 def finite(v: float) -> bool:

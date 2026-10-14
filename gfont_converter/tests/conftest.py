@@ -22,7 +22,12 @@ FONT_CANDIDATES = [
 
 
 def real_templates():
-    return sorted(glob.glob(os.path.join(TEMPLATE_DIR, "*.gfont")))
+    found = glob.glob(os.path.join(TEMPLATE_DIR, "*.gfont"))
+    found += glob.glob(os.path.join(ROOT, "resources", "*.gfont"))   # встроенный шаблон
+    by_name = {}
+    for p in found:
+        by_name.setdefault(os.path.basename(p), p)
+    return sorted(by_name.values())
 
 
 def make_template_bytes() -> bytes:

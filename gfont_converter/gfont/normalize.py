@@ -252,8 +252,8 @@ def _smooth_noise(rng, n: int, amp: float) -> np.ndarray:
 
 
 def place_glyph(shape: GlyphShape, s: float, tm: TargetMetrics,
-                variation: float = 0.0, rng: Optional[np.random.Generator] = None
-                ) -> List[List[Point]]:
+                variation: float = 0.0, rng: Optional[np.random.Generator] = None,
+                info: Optional[dict] = None) -> List[List[Point]]:
     """GlyphShape (ед. шрифта) -> штрихи .gfont (Y вниз, X по центру bbox)."""
     var = _variation(rng, variation) if (variation > 0 and rng is not None) else None
     slant = math.tan(math.radians(tm.slant_deg) + (var["slant"] if var else 0.0))
@@ -299,6 +299,8 @@ def place_glyph(shape: GlyphShape, s: float, tm: TargetMetrics,
         return []
     allp = np.vstack(strokes + anchors)
     cx = 0.5 * (allp[:, 0].min() + allp[:, 0].max())
+    if info is not None:
+        info["cx"] = float(cx)
     out = []
     for q in _order_strokes(strokes):
         q = q.copy()
@@ -323,3 +325,15 @@ def _order_strokes(strokes: List[np.ndarray]) -> List[np.ndarray]:
                 q = q[::-1]
         fixed.append(q)
     return sorted(fixed, key=lambda q: (round(float(q[:, 0].min()) / 60.0), float(q[:, 1].min())))
+
+
+def place_outline(contours, s: float, tm: TargetMetrics, cx: float) -> List[np.ndarray]:
+    """Контуры исходного шрифта в координатах .gfont (для сравнения в предпросмотре)."""
+    slant = math.tan(math.radians(tm.slant_deg))
+    out = []
+    for c in contours:
+        c = np.asarray(c, dtype=float)
+        x = c[:, 0] * s * tm.spacing
+        h = c[:, 1] * s
+        out.append(np.stack([x + h * slant - cx, tm.baseline - h], axis=1))
+    return out
