@@ -187,7 +187,9 @@ class FontSession:
         info: dict = {}
         strokes = (place_glyph(shape, s, tm, p.variation, rng, info,
                                lowercase=unicodedata.category(chr(code)) == "Ll",
-                               xheight=self.fm.xheight)
+                               xheight=self.fm.xheight,
+                               uppercase=unicodedata.category(chr(code)) == "Lu",
+                               cap=self.fm.cap)
                    if not shape.empty else [])
         if strokes:
             # ровно то, что будет записано в файл (float32)

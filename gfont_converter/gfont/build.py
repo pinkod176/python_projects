@@ -264,7 +264,8 @@ def convert(opts: ConvertOptions, log=print) -> ConvertReport:
         rng = np.random.default_rng([opts.seed, code]) if opts.variation > 0 else None
         strokes = (place_glyph(shape, s, opts.metrics, opts.variation, rng,
                                lowercase=unicodedata.category(chr(code)) == "Ll",
-                               xheight=fm.xheight)
+                               xheight=fm.xheight,
+                               uppercase=unicodedata.category(chr(code)) == "Lu", cap=fm.cap)
                    if not shape.empty else [])
         if not any(len(st) >= 2 for st in strokes):
             rep.empty_in_font.append(code)

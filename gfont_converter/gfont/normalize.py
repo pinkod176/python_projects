@@ -254,32 +254,39 @@ def _smooth_noise(rng, n: int, amp: float) -> np.ndarray:
     return z / s * amp
 
 
-def compress_overhang(strokes, xheight: float, k: float):
-    """Поджать части строчной буквы, которые выше x-height или ниже базовой линии
-    и торчат вбок за «основу» (то, что лежит между базовой линией и x-height).
+def compress_overhang(strokes, band_top: float, k: float):
+    """Поджать части буквы, которые торчат вбок за её «основу».
 
+    Основа — всё, что лежит между базовой линией и band_top (x-height для строчных,
+    высота заглавных для прописных). Флажки и хвосты выше/ниже основы, уходящие вбок
+    дальше основы, сжимаются по X: остаётся доля k, но не больше 0.7·k ширины основы —
+    поэтому даже очень длинный флажок («б» в курсивных шрифтах) не даёт пробела.
     strokes — список (Nx2, closed) в единицах шрифта (Y вверх). Основа не меняется.
     """
-    if k >= 1.0 or not strokes or xheight <= 0:
+    if k >= 1.0 or not strokes or band_top <= 0:
         return strokes
     allp = np.vstack([np.asarray(p, dtype=float) for p, _ in strokes])
-    tol = 0.02 * xheight
-    band = allp[(allp[:, 1] >= -tol) & (allp[:, 1] <= xheight + tol)]
+    tol = 0.02 * band_top
+    band = allp[(allp[:, 1] >= -tol) & (allp[:, 1] <= band_top + tol)]
     if len(band) < 3:
         return strokes
     lo, hi = band[:, 0].min(), band[:, 0].max()
     w = max(hi - lo, 1.0)
-    margin = max(0.08 * w, 0.03 * xheight)
-    over = max(allp[:, 0].max() - hi, lo - allp[:, 0].min())
-    if over <= max(0.5 * w, 0.2 * xheight):     # заметных хвостов нет
-        return strokes
+    margin = max(0.06 * w, 0.02 * band_top)
     r, l = hi + margin, lo - margin
+    allowed = 0.7 * k * w                    # предел длины торчащей части
+    ex_r = allp[:, 0].max() - r
+    ex_l = l - allp[:, 0].min()
+    k_r = min(k, allowed / ex_r) if ex_r > 0 else 1.0
+    k_l = min(k, allowed / ex_l) if ex_l > 0 else 1.0
+    if k_r >= 1.0 and k_l >= 1.0:
+        return strokes
     out = []
     for p, closed in strokes:
         q = np.asarray(p, dtype=float).copy()
         x = q[:, 0]
-        x[x > r] = r + (x[x > r] - r) * k
-        x[x < l] = l - (l - x[x < l]) * k
+        x[x > r] = r + (x[x > r] - r) * k_r
+        x[x < l] = l - (l - x[x < l]) * k_l
         out.append((q, closed))
     return out
 
@@ -287,7 +294,8 @@ def compress_overhang(strokes, xheight: float, k: float):
 def place_glyph(shape: GlyphShape, s: float, tm: TargetMetrics,
                 variation: float = 0.0, rng: Optional[np.random.Generator] = None,
                 info: Optional[dict] = None, *, lowercase: bool = False,
-                xheight: float = 0.0) -> List[List[Point]]:
+                xheight: float = 0.0, uppercase: bool = False,
+                cap: float = 0.0) -> List[List[Point]]:
     """GlyphShape (ед. шрифта) -> штрихи .gfont (Y вниз, X по центру bbox).
 
     lowercase + xheight (ед. шрифта): поджать хвосты строчных (см. compress_overhang).
@@ -295,6 +303,8 @@ def place_glyph(shape: GlyphShape, s: float, tm: TargetMetrics,
     src_strokes = shape.strokes
     if lowercase and xheight > 0:
         src_strokes = compress_overhang(src_strokes, xheight, tm.overhang)
+    elif uppercase and cap > 0:
+        src_strokes = compress_overhang(src_strokes, cap, tm.overhang)
     var = _variation(rng, variation) if (variation > 0 and rng is not None) else None
     slant = math.tan(math.radians(tm.slant_deg) + (var["slant"] if var else 0.0))
     gs = s * (var["scale"] if var else 1.0)

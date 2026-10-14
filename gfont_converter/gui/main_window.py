@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QFileDialog, 
                                QScrollArea, QSizePolicy, QSlider, QSpinBox, QSplitter,
                                QTabWidget, QToolButton, QVBoxLayout, QWidget)
 
+from gfont import __version__
 from gfont.charset import parse_charset
 from gfont.errors import UserError
 from gfont.format import read_gfont
@@ -109,7 +110,7 @@ class MainWindow(QMainWindow):
         self._loading = False
         self.last_report = None
         self.last_saved: List[Path] = []
-        self.setWindowTitle("GfontConverter — конвертер шрифтов в .gfont")
+        self.setWindowTitle(f"GfontConverter {__version__} — конвертер шрифтов в .gfont")
         icon = resource_dir() / "icon.png"
         if icon.exists():
             self.setWindowIcon(QIcon(str(icon)))
@@ -880,7 +881,9 @@ class MainWindow(QMainWindow):
         QMessageBox.critical(self, "Ошибка", text)
 
     def about(self) -> None:
-        QMessageBox.about(self, "О программе", ABOUT_HTML)
+        QMessageBox.about(self, "О программе",
+                          ABOUT_HTML.replace("<h3>GfontConverter</h3>",
+                                             f"<h3>GfontConverter {__version__}</h3>"))
 
     def closeEvent(self, ev) -> None:
         if self.task is not None and self.task.isRunning():
