@@ -4,21 +4,19 @@ setlocal EnableExtensions
 cd /d "%~dp0"
 echo === Сборка GfontConverter.exe ===
 
-rem --- найти Python 3.11+
+rem --- найти Python 3.11+ (сначала python из PATH, потом py-лаунчер;
+rem     заглушка python.exe из Microsoft Store не проходит проверку версии)
 set "PYEXE="
-where py >nul 2>nul && set "PYEXE=py -3"
+python -c "import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)" >nul 2>nul && set "PYEXE=python"
 if not defined PYEXE (
-  where python >nul 2>nul && set "PYEXE=python"
+  py -3 -c "import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)" >nul 2>nul && set "PYEXE=py -3"
 )
 if not defined PYEXE (
-  echo Не найден Python. Установите Python 3.11+ с https://www.python.org ^(галочка "Add python.exe to PATH"^).
+  echo Не найден Python 3.11 или новее. Установите его с https://www.python.org
+  echo ^(при установке отметьте "Add python.exe to PATH"^) и запустите build_exe.bat снова.
   goto :fail
 )
-%PYEXE% -c "import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)"
-if errorlevel 1 (
-  echo Нужен Python 3.11 или новее.
-  goto :fail
-)
+%PYEXE% --version
 
 rem --- виртуальное окружение и зависимости
 if not exist ".venv\Scripts\python.exe" (

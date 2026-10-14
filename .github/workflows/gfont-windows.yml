@@ -67,7 +67,10 @@ jobs:
           New-Item -ItemType Directory -Force ..\ci_out | Out-Null
           $bmp.Save((Join-Path (Resolve-Path ..\ci_out) "windows_desktop.png"))
           "окно работает, PID $($p.Id); экран $($b.Width)x$($b.Height)"
-          Stop-Process -Id $p.Id -Force
+          # exe в один файл = загрузчик + процесс приложения: завершаем всё дерево
+          taskkill /PID $p.Id /T /F
+          Start-Sleep -Seconds 2
+          Get-Process GfontConverter -ErrorAction SilentlyContinue | Stop-Process -Force
 
       - uses: actions/upload-artifact@v4
         with:
