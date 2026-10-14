@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import sys
 import threading
+import unicodedata
 from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
@@ -35,7 +36,7 @@ DEFAULT_PREVIEW_TEXT = ("Съешь же ещё этих мягких франц
                         "The quick brown fox jumps over the lazy dog. "
                         "0123456789 № % @ * ( ) « » — – ‑ ! ? : ; ,")
 
-DEFAULT_TEMPLATE_NAME = "с_клода.gfont"
+DEFAULT_TEMPLATE_NAME = "с_клода_дополненный.gfont"
 
 
 def resource_dir() -> Path:
@@ -59,10 +60,11 @@ class UiParams:
     spacing: float = 1.0             # ширина букв по X (см. README: интервал неизвестен)
     density: float = 1.0             # плотность точек: шаг = 25 / density
     smooth: float = 3.0
+    overhang: float = 0.35           # хвосты строчных за пределами основы (1.0 = как в шрифте)
     liveliness: float = 0.0          # 0..1 («живость почерка» 0–100 %)
     seed: int = 1
     no_new_entries: bool = False
-    replace_old: bool = True         # убрать старые начертания шаблона (--drop-template-noncjk)
+    replace_old: bool = False        # удалять буквы шаблона, которых нет в шрифте (строго один стиль)
 
     @classmethod
     def from_dict(cls, d: dict) -> "UiParams":
@@ -87,7 +89,8 @@ class UiParams:
 
     def metrics(self) -> TargetMetrics:
         return TargetMetrics(scale=self.scale, slant_deg=self.slant, spacing=self.spacing,
-                             step=25.0 / max(self.density, 0.1), smooth=self.smooth)
+                             step=25.0 / max(self.density, 0.1), smooth=self.smooth,
+                             overhang=self.overhang)
 
     @property
     def variation(self) -> float:
@@ -182,7 +185,10 @@ class FontSession:
                 self.cache[key] = shape
         rng = np.random.default_rng([p.seed, code]) if p.variation > 0 else None
         info: dict = {}
-        strokes = place_glyph(shape, s, tm, p.variation, rng, info) if not shape.empty else []
+        strokes = (place_glyph(shape, s, tm, p.variation, rng, info,
+                               lowercase=unicodedata.category(chr(code)) == "Ll",
+                               xheight=self.fm.xheight)
+                   if not shape.empty else [])
         if strokes:
             # ровно то, что будет записано в файл (float32)
             strokes = decode_glyph(encode_glyph(code, strokes))[1]
@@ -200,7 +206,7 @@ class FontSession:
         return ConvertOptions(
             font=str(self.path), output=str(output), template=str(template), mode=p.mode,
             charset=p.charset_spec(), no_new_entries=p.no_new_entries,
-            drop_template_noncjk=p.replace_old, variation=p.variation, seed=p.seed,
+            preserve_template_extra=not p.replace_old, drop_template_noncjk=p.replace_old, variation=p.variation, seed=p.seed,
             metrics=p.metrics())
 
     def convert(self, p: UiParams, output, template, *, progress=None, cancel=None,

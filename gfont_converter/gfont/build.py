@@ -22,7 +22,7 @@ from .normalize import TargetMetrics, font_scale, measure_font, place_glyph
 from .validate import ValidationReport, validate_file
 
 
-NONCJK_LIMIT = 0x2E80   # ниже — латиница, кириллица, греческий, символы; выше — CJK и т.п.
+NONCJK_LIMIT = 0x2000   # ниже — буквы (латиница, кириллица, греческий…); выше — знаки, CJK
 
 
 @dataclass
@@ -34,7 +34,7 @@ class ConvertOptions:
     charset: str = "default"
     preserve_template_extra: bool = False
     no_new_entries: bool = False
-    drop_template_noncjk: bool = False     # удалить все нетронутые записи шаблона < U+2E80
+    drop_template_noncjk: bool = False     # удалить все нетронутые записи шаблона < U+2000
     variation: float = 0.0
     seed: int = 1
     jobs: int = 0                          # 0 = по числу ядер
@@ -62,7 +62,7 @@ class ConvertReport:
     removed_template: List[int] = field(default_factory=list)
     kept_template: List[int] = field(default_factory=list)  # --preserve-template-extra
     dropped_noncjk: List[int] = field(default_factory=list) # --drop-template-noncjk
-    untouched_noncjk: List[int] = field(default_factory=list)  # остались от шаблона (< U+2E80)
+    untouched_noncjk: List[int] = field(default_factory=list)  # остались от шаблона (< U+2000)
     template_entries: int = 0
     total_entries: int = 0
     seconds: float = 0.0
@@ -99,10 +99,10 @@ class ConvertReport:
             L.append(f"Оставлены записи шаблона (--preserve-template-extra): "
                      f"{len(self.kept_template)}  {chars(self.kept_template)}")
         if self.dropped_noncjk:
-            L.append(f"Удалены прочие старые записи шаблона < U+2E80 (--drop-template-noncjk): "
+            L.append(f"Удалены прочие старые записи шаблона < U+2000 (--drop-template-noncjk): "
                      f"{len(self.dropped_noncjk)}  {chars(self.dropped_noncjk)}")
         if self.untouched_noncjk:
-            L.append(f"ВНИМАНИЕ: остались нетронутые записи шаблона < U+2E80 (старый стиль, в с_клода "
+            L.append(f"ВНИМАНИЕ: остались нетронутые записи шаблона < U+2000 (старый стиль, в с_клода "
                      f"они битые; убрать: --drop-template-noncjk): {len(self.untouched_noncjk)}  "
                      f"{chars(self.untouched_noncjk)}")
         L.append(f"Время: {self.seconds:.1f} c")
@@ -262,7 +262,10 @@ def convert(opts: ConvertOptions, log=print) -> ConvertReport:
         _check(cancel)
         shape = shapes[code]
         rng = np.random.default_rng([opts.seed, code]) if opts.variation > 0 else None
-        strokes = place_glyph(shape, s, opts.metrics, opts.variation, rng) if not shape.empty else []
+        strokes = (place_glyph(shape, s, opts.metrics, opts.variation, rng,
+                               lowercase=unicodedata.category(chr(code)) == "Ll",
+                               xheight=fm.xheight)
+                   if not shape.empty else [])
         if not any(len(st) >= 2 for st in strokes):
             rep.empty_in_font.append(code)
             continue

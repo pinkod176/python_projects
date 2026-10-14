@@ -36,6 +36,9 @@ class TargetMetrics:
     dot_radius: float = 6.0     # минимальный радиус спирали для «точки»
     fill_spacing: float = 9.0   # шаг витков при заливке крупных пятен (● ■)
     side_anchors: bool = False  # экспериментально: одиночные move-to на краях advance
+    overhang: float = 0.35      # строчные: доля длины хвостов/флажков за пределами основы
+                                # (1.0 = не трогать). Приложение ставит буквы по крайним
+                                # точкам, длинный флажок «б» или хвост «у» даёт дыру в строке
 
 
 @dataclass
@@ -251,10 +254,47 @@ def _smooth_noise(rng, n: int, amp: float) -> np.ndarray:
     return z / s * amp
 
 
+def compress_overhang(strokes, xheight: float, k: float):
+    """Поджать части строчной буквы, которые выше x-height или ниже базовой линии
+    и торчат вбок за «основу» (то, что лежит между базовой линией и x-height).
+
+    strokes — список (Nx2, closed) в единицах шрифта (Y вверх). Основа не меняется.
+    """
+    if k >= 1.0 or not strokes or xheight <= 0:
+        return strokes
+    allp = np.vstack([np.asarray(p, dtype=float) for p, _ in strokes])
+    tol = 0.02 * xheight
+    band = allp[(allp[:, 1] >= -tol) & (allp[:, 1] <= xheight + tol)]
+    if len(band) < 3:
+        return strokes
+    lo, hi = band[:, 0].min(), band[:, 0].max()
+    w = max(hi - lo, 1.0)
+    margin = max(0.08 * w, 0.03 * xheight)
+    over = max(allp[:, 0].max() - hi, lo - allp[:, 0].min())
+    if over <= max(0.5 * w, 0.2 * xheight):     # заметных хвостов нет
+        return strokes
+    r, l = hi + margin, lo - margin
+    out = []
+    for p, closed in strokes:
+        q = np.asarray(p, dtype=float).copy()
+        x = q[:, 0]
+        x[x > r] = r + (x[x > r] - r) * k
+        x[x < l] = l - (l - x[x < l]) * k
+        out.append((q, closed))
+    return out
+
+
 def place_glyph(shape: GlyphShape, s: float, tm: TargetMetrics,
                 variation: float = 0.0, rng: Optional[np.random.Generator] = None,
-                info: Optional[dict] = None) -> List[List[Point]]:
-    """GlyphShape (ед. шрифта) -> штрихи .gfont (Y вниз, X по центру bbox)."""
+                info: Optional[dict] = None, *, lowercase: bool = False,
+                xheight: float = 0.0) -> List[List[Point]]:
+    """GlyphShape (ед. шрифта) -> штрихи .gfont (Y вниз, X по центру bbox).
+
+    lowercase + xheight (ед. шрифта): поджать хвосты строчных (см. compress_overhang).
+    """
+    src_strokes = shape.strokes
+    if lowercase and xheight > 0:
+        src_strokes = compress_overhang(src_strokes, xheight, tm.overhang)
     var = _variation(rng, variation) if (variation > 0 and rng is not None) else None
     slant = math.tan(math.radians(tm.slant_deg) + (var["slant"] if var else 0.0))
     gs = s * (var["scale"] if var else 1.0)
@@ -270,7 +310,7 @@ def place_glyph(shape: GlyphShape, s: float, tm: TargetMetrics,
         return np.stack([x, y], axis=1)
 
     strokes: List[np.ndarray] = []
-    for pts, closed in shape.strokes:
+    for pts, closed in src_strokes:
         q = tf(np.asarray(pts, dtype=float))
         if var and var["jitter"] > 0:
             q = q + _smooth_noise(rng, len(q), var["jitter"])

@@ -253,11 +253,17 @@ class MainWindow(QMainWindow):
         self.sl_density = Slider(50, 200, 100, "{:.0f} %", 1,
                                  "Плотность точек на штрихе (100 % ≈ шаг 25, как в эталоне)")
         self.sl_smooth = Slider(0, 8, 3, "{:.1f}", 10, "Сглаживание штрихов")
+        self.sl_overhang = Slider(10, 100, 35, "{:.0f} %", 1,
+                                  "Строчные буквы: насколько длинными оставить хвосты и флажки, "
+                                  "торчащие вбок за основу буквы (флажок «б», хвост «у», «з», «j»).\n"
+                                  "100 % — как в шрифте. Меньше — нет больших пробелов рядом с такими "
+                                  "буквами: приложение ставит буквы по их крайним точкам.")
         form.addRow("Наклон:", self.sl_slant)
         form.addRow("Масштаб:", self.sl_scale)
         form.addRow("Интервал (ширина):", self.sl_spacing)
         form.addRow("Плотность точек:", self.sl_density)
         form.addRow("Сглаживание:", self.sl_smooth)
+        form.addRow("Хвосты строчных:", self.sl_overhang)
 
         self.sl_live = Slider(0, 100, 0, "{:.0f} %", 1,
                               "Живость почерка: небольшой случайный наклон, масштаб и дрожание "
@@ -284,18 +290,21 @@ class MainWindow(QMainWindow):
 
         self.ch_no_new = QCheckBox("Не добавлять новые символы, только заменять\nсуществующие в шаблоне")
         self.ch_no_new.setToolTip("Безопасный режим: приём приложением новых кодов не проверен.")
-        self.ch_replace_old = QCheckBox("Заменять альтернативные начертания\n(рекомендуется)")
-        self.ch_replace_old.setChecked(True)
+        self.ch_replace_old = QCheckBox("Удалять буквы шаблона, которых нет\nв шрифте (строго один почерк)")
+        self.ch_replace_old.setChecked(False)
         self.ch_replace_old.setToolTip(
-            "Удаляет из шаблона все старые начертания латиницы, кириллицы и символов, которые\n"
-            "не были перерисованы, чтобы не вылезал старый стиль. В шаблоне «с_клода» они битые.\n"
-            "Записи с кодами ≥ 32768 — это иероглифы, а не альтернативы: их программа не трогает.")
+            "Выключено (по умолчанию): если в вашем шрифте нет какой-то буквы (например, «ё» или «ā»),\n"
+            "останется буква из встроенного шаблона — почерк Caveat, выровненный по тем же меркам.\n"
+            "Включено: такие буквы удаляются, в файле только почерк вашего шрифта.\n"
+            "Знаки шаблона (№ √ Ⅰ ① …), иероглифы и служебные записи не трогаются никогда.\n"
+            "Записи с кодами ≥ 32768 — это иероглифы, а не «альтернативные начертания».")
         form.addRow(self.ch_no_new)
         form.addRow(self.ch_replace_old)
 
         for sig in (self.cb_mode.currentIndexChanged, self.cb_charset.currentIndexChanged,
                     self.ed_custom.textChanged, self.sl_slant.changed, self.sl_scale.changed,
                     self.sl_spacing.changed, self.sl_density.changed, self.sl_smooth.changed,
+                    self.sl_overhang.changed,
                     self.sl_live.changed, self.sp_seed.valueChanged, self.ch_no_new.toggled,
                     self.ch_replace_old.toggled):
             sig.connect(self.params_changed)
@@ -421,6 +430,10 @@ class MainWindow(QMainWindow):
         self.sp_n.setValue(int(s["variants_n"]))
         self.btn_log.setChecked(bool(s["log_open"]))
         self._toggle_log(bool(s["log_open"]))
+        if s["params_version"] != 2:
+            # раньше флажок старых начертаний был включён по умолчанию (шаблон был битым)
+            self.ch_replace_old.setChecked(False)
+            s["params_version"] = 2
         if s["geometry"]:
             try:
                 self.restoreGeometry(QByteArray.fromBase64(s["geometry"].encode()))
@@ -454,6 +467,7 @@ class MainWindow(QMainWindow):
             custom_chars=self.ed_custom.text(), slant=self.sl_slant.value(),
             scale=self.sl_scale.value() / 100.0, spacing=self.sl_spacing.value() / 100.0,
             density=self.sl_density.value() / 100.0, smooth=self.sl_smooth.value(),
+            overhang=self.sl_overhang.value() / 100.0,
             liveliness=self.sl_live.value() / 100.0, seed=self.sp_seed.value(),
             no_new_entries=self.ch_no_new.isChecked(),
             replace_old=self.ch_replace_old.isChecked())
@@ -467,6 +481,7 @@ class MainWindow(QMainWindow):
         self.sl_spacing.set_value(p.spacing * 100)
         self.sl_density.set_value(p.density * 100)
         self.sl_smooth.set_value(p.smooth)
+        self.sl_overhang.set_value(p.overhang * 100)
         self.sl_live.set_value(p.liveliness * 100)
         self.sp_seed.setValue(p.seed)
         self.ch_no_new.setChecked(p.no_new_entries)

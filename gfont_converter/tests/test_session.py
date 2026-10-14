@@ -45,7 +45,7 @@ def test_diagnose():
 
 def test_default_template_bundled():
     p = default_template_path()
-    assert p.exists(), "resources/с_клода.gfont должен лежать в проекте"
+    assert p.exists(), "встроенный шаблон должен лежать в resources/"
     assert len(read_gfont(p).entries) > 1000
 
 

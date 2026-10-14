@@ -19,7 +19,7 @@ excludes = ["tkinter", "matplotlib", "IPython", "pytest", "PySide6.QtWebEngineCo
 a = Analysis(
     ["gfont_gui.py"],
     pathex=["."],
-    datas=[("resources/с_клода.gfont", "resources"),
+    datas=[("resources/с_клода_дополненный.gfont", "resources"),
            ("resources/icon.png", "resources"),
            ("resources/icon.ico", "resources")],
     hiddenimports=hidden + ["convert"],

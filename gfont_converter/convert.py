@@ -2,8 +2,8 @@
 """Конвертер шрифтов TTF/OTF в рукописный формат .gfont.
 
 Примеры:
-    python convert.py шрифт.ttf результат.gfont --template с_клода.gfont --preview out.png
-    python convert.py --calibrate калибровка.gfont --template с_клода.gfont --preview cal.png
+    python convert.py шрифт.ttf результат.gfont --template с_клода_дополненный.gfont --preview out.png
+    python convert.py --calibrate калибровка.gfont --template с_клода_дополненный.gfont --preview cal.png
     python convert.py --validate результат.gfont
     python convert.py --inspect результат.gfont --sheet лист.png
 """
@@ -56,8 +56,8 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--preserve-template-extra", action="store_true",
                    help="не удалять записи шаблона для символов из charset, которых нет в шрифте")
     g.add_argument("--drop-template-noncjk", action="store_true",
-                   help="удалить ВСЕ нетронутые записи шаблона с кодами < U+2E80 (латиница, кириллица, "
-                        "греческий, символы старого стиля); CJK и префикс не трогаются")
+                   help="удалить ВСЕ нетронутые записи шаблона с кодами < U+2000 (буквы латиницы, кириллицы, "
+                        "греческого старого стиля); знаки, CJK и префикс не трогаются")
     g.add_argument("--no-new-entries", action="store_true",
                    help="не добавлять коды, которых нет в шаблоне (только замена на месте)")
     g.add_argument("--font-number", type=int, default=0, help="номер шрифта в .ttc")
@@ -73,6 +73,9 @@ def build_parser() -> argparse.ArgumentParser:
     m.add_argument("--slant", type=float, default=0.0, help="наклон вправо, градусы")
     m.add_argument("--spacing", type=float, default=1.0,
                    help="множитель ширины глифа по X (грубая подгонка интервала, см. README)")
+    m.add_argument("--overhang", type=float, default=0.35,
+                   help="строчные буквы: какая доля длины хвостов/флажков, торчащих вбок за основу "
+                        "буквы, остаётся (1.0 = как в шрифте). Убирает дыры после «б», перед «у»")
     m.add_argument("--side-anchors", action="store_true",
                    help="ЭКСПЕРИМЕНТ: одиночные move-to на краях ширины символа из шрифта "
                         "(включать только если калибровка показала, что они невидимы и влияют на интервал)")
@@ -105,7 +108,7 @@ def metrics_from(a) -> TargetMetrics:
                          size_by=a.size_by, scale=a.scale, slant_deg=a.slant, spacing=a.spacing,
                          step=a.step, smooth=a.smooth, corner_deg=a.corner,
                          dot_radius=a.dot_radius, fill_spacing=a.fill_spacing,
-                         side_anchors=a.side_anchors)
+                         side_anchors=a.side_anchors, overhang=a.overhang)
 
 
 def do_preview(path: str, a, title: str) -> None:

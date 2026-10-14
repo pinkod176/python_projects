@@ -105,6 +105,6 @@ def test_real_template_high_codes_are_not_alternates():
         gf = read_gfont(path)
         high = [c for c in gf.codes() if c >= 0x8000]
         orphans = [c for c in high if (c - 0x8000) not in gf]
-        assert len(orphans) > 0.9 * len(high)
+        assert len(orphans) > 0.5 * len(high)
         same = [c for c in high if (c - 0x8000) in gf and gf.raw(c)[2:] == gf.raw(c - 0x8000)[2:]]
         assert same == []

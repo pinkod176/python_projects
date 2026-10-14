@@ -23,6 +23,7 @@ def settings_path() -> Path:
 
 DEFAULTS: Dict[str, Any] = {
     "params": {},
+    "params_version": 0,
     "last_font": "",
     "last_font_dir": "",
     "last_save_dir": "",
