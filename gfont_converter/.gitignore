@@ -1,0 +1,6 @@
+# эталонные/пользовательские шрифты не храним в репозитории
+templates/*.gfont
+*.gfont
+out/
+__pycache__/
+.pytest_cache/
