@@ -60,6 +60,7 @@ class UiParams:
     spacing: float = 1.0             # ширина букв по X (см. README: интервал неизвестен)
     density: float = 1.0             # плотность точек: шаг = 25 / density
     smooth: float = 3.0
+    hand_order: bool = True          # порядок штрихов как при письме рукой
     overhang: float = 0.35           # хвосты строчных за пределами основы (1.0 = как в шрифте)
     liveliness: float = 0.0          # 0..1 («живость почерка» 0–100 %)
     seed: int = 1
@@ -90,7 +91,7 @@ class UiParams:
     def metrics(self) -> TargetMetrics:
         return TargetMetrics(scale=self.scale, slant_deg=self.slant, spacing=self.spacing,
                              step=25.0 / max(self.density, 0.1), smooth=self.smooth,
-                             overhang=self.overhang)
+                             overhang=self.overhang, hand_order=self.hand_order)
 
     @property
     def variation(self) -> float:
@@ -189,7 +190,8 @@ class FontSession:
                                lowercase=unicodedata.category(chr(code)) == "Ll",
                                xheight=self.fm.xheight,
                                uppercase=unicodedata.category(chr(code)) == "Lu",
-                               cap=self.fm.cap)
+                               cap=self.fm.cap,
+                               letter=unicodedata.category(chr(code)).startswith("L"))
                    if not shape.empty else [])
         if strokes:
             # ровно то, что будет записано в файл (float32)

@@ -554,13 +554,21 @@ def assemble_strokes(g: SkelGraph, dir_dist: float, join_angle: float
                 d += 2 if e.a == e.b else 1
         return d
 
+    orig_deg = {n: unused_deg(n) for n in inc}
     strokes = []
     while len(used) < len(alive):
-        # старт: висячие концы, потом нечётные узлы, потом любые; сверху-слева
+        # старт: настоящие концы штрихов (степень 1 с самого начала), потом узлы, ставшие
+        # свободными по ходу сборки, потом прочие нечётные, потом любые; сверху-слева.
+        # Иначе у «Н» перекладина склеивалась с половиной стойки и шла справа налево.
         cands = [n for n in inc if unused_deg(n) > 0]
         def score(n):
             d = unused_deg(n)
-            pri = 0 if d == 1 else (1 if d % 2 == 1 else 2)
+            if d == 1 and orig_deg.get(n) == 1:
+                pri = 0
+            elif d == 1:
+                pri = 1
+            else:
+                pri = 2 if d % 2 == 1 else 3
             r, c = g.node_pos[n]
             return (pri, c + 0.5 * r)
         cur = min(cands, key=score)

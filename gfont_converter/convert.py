@@ -73,6 +73,9 @@ def build_parser() -> argparse.ArgumentParser:
     m.add_argument("--slant", type=float, default=0.0, help="наклон вправо, градусы")
     m.add_argument("--spacing", type=float, default=1.0,
                    help="множитель ширины глифа по X (грубая подгонка интервала, см. README)")
+    m.add_argument("--no-hand-order", action="store_true",
+                   help="не менять порядок и направление штрихов (по умолчанию — как при письме "
+                        "рукой: сверху вниз/слева направо, петли против часовой, точки последними)")
     m.add_argument("--overhang", type=float, default=0.35,
                    help="строчные буквы: какая доля длины хвостов/флажков, торчащих вбок за основу "
                         "буквы, остаётся (1.0 = как в шрифте). Убирает дыры после «б», перед «у»")
@@ -108,7 +111,8 @@ def metrics_from(a) -> TargetMetrics:
                          size_by=a.size_by, scale=a.scale, slant_deg=a.slant, spacing=a.spacing,
                          step=a.step, smooth=a.smooth, corner_deg=a.corner,
                          dot_radius=a.dot_radius, fill_spacing=a.fill_spacing,
-                         side_anchors=a.side_anchors, overhang=a.overhang)
+                         side_anchors=a.side_anchors, overhang=a.overhang,
+                         hand_order=not a.no_hand_order)
 
 
 def do_preview(path: str, a, title: str) -> None:

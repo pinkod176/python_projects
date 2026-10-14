@@ -299,6 +299,15 @@ class MainWindow(QMainWindow):
             "Включено: такие буквы удаляются, в файле только почерк вашего шрифта.\n"
             "Знаки шаблона (№ √ Ⅰ ① …), иероглифы и служебные записи не трогаются никогда.\n"
             "Записи с кодами ≥ 32768 — это иероглифы, а не «альтернативные начертания».")
+        self.ch_hand = QCheckBox("Порядок штрихов как при письме рукой")
+        self.ch_hand.setChecked(True)
+        self.ch_hand.setToolTip(
+            "Штрихи пишутся в том порядке и направлении, как пишет человек:\n"
+            "сверху вниз и слева направо, петли («о», «б», «в») — против часовой стрелки\n"
+            "от верхней точки, перекладины («Н», «А», «t») — после основных штрихов,\n"
+            "точки и надстрочные знаки («i», «ё», «й») — последними.\n"
+            "Порядок и стрелки видны на вкладке «Символы».")
+        form.addRow(self.ch_hand)
         form.addRow(self.ch_no_new)
         form.addRow(self.ch_replace_old)
 
@@ -307,7 +316,7 @@ class MainWindow(QMainWindow):
                     self.sl_spacing.changed, self.sl_density.changed, self.sl_smooth.changed,
                     self.sl_overhang.changed,
                     self.sl_live.changed, self.sp_seed.valueChanged, self.ch_no_new.toggled,
-                    self.ch_replace_old.toggled):
+                    self.ch_replace_old.toggled, self.ch_hand.toggled):
             sig.connect(self.params_changed)
         self.cb_charset.currentIndexChanged.connect(self._update_custom_enabled)
 
@@ -468,7 +477,7 @@ class MainWindow(QMainWindow):
             custom_chars=self.ed_custom.text(), slant=self.sl_slant.value(),
             scale=self.sl_scale.value() / 100.0, spacing=self.sl_spacing.value() / 100.0,
             density=self.sl_density.value() / 100.0, smooth=self.sl_smooth.value(),
-            overhang=self.sl_overhang.value() / 100.0,
+            overhang=self.sl_overhang.value() / 100.0, hand_order=self.ch_hand.isChecked(),
             liveliness=self.sl_live.value() / 100.0, seed=self.sp_seed.value(),
             no_new_entries=self.ch_no_new.isChecked(),
             replace_old=self.ch_replace_old.isChecked())
@@ -483,6 +492,7 @@ class MainWindow(QMainWindow):
         self.sl_density.set_value(p.density * 100)
         self.sl_smooth.set_value(p.smooth)
         self.sl_overhang.set_value(p.overhang * 100)
+        self.ch_hand.setChecked(p.hand_order)
         self.sl_live.set_value(p.liveliness * 100)
         self.sp_seed.setValue(p.seed)
         self.ch_no_new.setChecked(p.no_new_entries)

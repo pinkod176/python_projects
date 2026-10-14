@@ -17,6 +17,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter1d
 
 from .extract import FontSource, GlyphShape
+from .stroke_order import hand_order
 
 Point = Tuple[float, float]
 
@@ -36,6 +37,7 @@ class TargetMetrics:
     dot_radius: float = 6.0     # минимальный радиус спирали для «точки»
     fill_spacing: float = 9.0   # шаг витков при заливке крупных пятен (● ■)
     side_anchors: bool = False  # экспериментально: одиночные move-to на краях advance
+    hand_order: bool = True     # порядок и направление штрихов как при письме рукой
     overhang: float = 0.35      # строчные: доля длины хвостов/флажков за пределами основы
                                 # (1.0 = не трогать). Приложение ставит буквы по крайним
                                 # точкам, длинный флажок «б» или хвост «у» даёт дыру в строке
@@ -295,7 +297,7 @@ def place_glyph(shape: GlyphShape, s: float, tm: TargetMetrics,
                 variation: float = 0.0, rng: Optional[np.random.Generator] = None,
                 info: Optional[dict] = None, *, lowercase: bool = False,
                 xheight: float = 0.0, uppercase: bool = False,
-                cap: float = 0.0) -> List[List[Point]]:
+                cap: float = 0.0, letter: bool = False) -> List[List[Point]]:
     """GlyphShape (ед. шрифта) -> штрихи .gfont (Y вниз, X по центру bbox).
 
     lowercase + xheight (ед. шрифта): поджать хвосты строчных (см. compress_overhang).
@@ -329,6 +331,7 @@ def place_glyph(shape: GlyphShape, s: float, tm: TargetMetrics,
         q = refine_stroke(q, closed, tm)
         if len(q) >= 2:
             strokes.append(q)
+    n_lines = len(strokes)
     fills = shape.fills if len(shape.fills) == len(shape.dots) else [None] * len(shape.dots)
     for (cx, cy, r), fill in zip(shape.dots, fills):
         if fill is not None and r * gs > 3.5 * tm.dot_radius:
@@ -352,7 +355,13 @@ def place_glyph(shape: GlyphShape, s: float, tm: TargetMetrics,
     if info is not None:
         info["cx"] = float(cx)
     out = []
-    for q in _order_strokes(strokes):
+    if tm.hand_order:
+        dots = [i >= n_lines for i in range(len(strokes))]
+        ordered = hand_order(strokes, dots, letter=lowercase or uppercase or letter,
+                             cap=tm.cap_height * tm.scale)
+    else:
+        ordered = _order_strokes(strokes)
+    for q in ordered:
         q = q.copy()
         q[:, 0] -= cx
         out.append([(float(x), float(y)) for x, y in q])
