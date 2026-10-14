@@ -813,7 +813,10 @@ class MainWindow(QMainWindow):
             return
         if not path.lower().endswith(".gfont"):
             path += ".gfont"
-        out, template, p = Path(path), self.template_path(), self.params()
+        self.start_calibration(Path(path))
+
+    def start_calibration(self, out: Path) -> TaskWorker:
+        template, p = self.template_path(), self.params()
 
         def job(progress, cancel, log):
             _, lines, written = make_calibration(template, out, p)
@@ -825,12 +828,15 @@ class MainWindow(QMainWindow):
             self.log_line(f"Калибровочный файл: {out}")
             self.log_line("\n".join(lines))
             self.log_line(rep.summary())
+            self.last_saved = [out]
+            if os.environ.get("GFONT_NO_DIALOGS"):
+                return
             QMessageBox.information(
                 self, "Калибровочный файл",
                 f"Создан {out}\n\nЗагрузите его в приложение и наберите:\n"
                 "HxoI|  HHHH xxxx oooo\n0123456789\n_____ ===== #####\nababab cdcdcd eded\nf g y\n\n"
                 "Что означает каждый символ — в журнале.")
-        self.run_task(job, "Калибровочный файл", done)
+        return self.run_task(job, "Калибровочный файл", done)
 
     def validate_dialog(self) -> None:
         path, _ = QFileDialog.getOpenFileName(self, "Проверить .gfont", self.settings["last_save_dir"] or "",
