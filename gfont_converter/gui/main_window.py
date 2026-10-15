@@ -54,6 +54,8 @@ u32 npts, npts байт флагов (0 — начало штриха, 1 — п�
 </ul>
 <p>Предпросмотр рисуется по штрихам из конвертации; раскладка строки в нём
 приблизительная.</p>
+<p><b>Нарисовать свой почерк</b> (кнопка вверху окна, Ctrl+D): каждый символ рисуется мышкой
+или пером по пунктирному шаблону, результат собирается в .gfont тем же движком.</p>
 """
 
 
@@ -172,6 +174,12 @@ class MainWindow(QMainWindow):
         tl.addWidget(self.lbl_template)
         tl.addWidget(self.btn_template)
         tl.addWidget(self.btn_template_default)
+        self.btn_draw = QPushButton("✍ Нарисовать свой почерк…")
+        self.btn_draw.setToolTip("Второй режим: нарисовать каждый символ мышкой или пером "
+                                 "по шаблону и получить .gfont со своим почерком")
+        self.btn_draw.setStyleSheet("font-weight: bold; padding: 6px 12px;")
+        self.btn_draw.clicked.connect(self.open_draw_mode)
+        tl.addWidget(self.btn_draw)
         root.addWidget(top)
 
         # --- середина: параметры | вкладки
@@ -413,6 +421,10 @@ class MainWindow(QMainWindow):
         m.addAction(a)
         a = QAction("Калибровочный файл…", self)
         a.triggered.connect(self.calibration_dialog)
+        m.addAction(a)
+        a = QAction("Нарисовать свой почерк…", self)
+        a.setShortcut(QKeySequence("Ctrl+D"))
+        a.triggered.connect(self.open_draw_mode)
         m.addAction(a)
         a = QAction("Проверить .gfont…", self)
         a.triggered.connect(self.validate_dialog)
@@ -890,6 +902,17 @@ class MainWindow(QMainWindow):
             return
         QMessageBox.critical(self, "Ошибка", text)
 
+    def open_draw_mode(self):
+        """Режим «Нарисовать свой почерк» — отдельное окно (одно на приложение)."""
+        from .draw_mode.window import DrawWindow
+        w = getattr(self, "draw_window", None)
+        if w is None or not w.isVisible():
+            w = self.draw_window = DrawWindow(self.settings)
+        w.show()
+        w.raise_()
+        w.activateWindow()
+        return w
+
     def about(self) -> None:
         QMessageBox.about(self, "О программе",
                           ABOUT_HTML.replace("<h3>GfontConverter</h3>",
@@ -905,6 +928,10 @@ class MainWindow(QMainWindow):
                 return
             self.task.cancel()
             self.task.wait(15000)
+        w = getattr(self, "draw_window", None)
+        if w is not None and w.isVisible() and not w.close():
+            ev.ignore()
+            return
         self.store_settings()
         self.engine.stop()
         super().closeEvent(ev)

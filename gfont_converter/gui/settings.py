@@ -35,6 +35,10 @@ DEFAULTS: Dict[str, Any] = {
     "variants_n": 3,
     "log_open": True,
     "geometry": "",
+    "dark_theme": False,
+    "draw_last_dir": "",
+    "draw_last_project": "",
+    "draw_geometry": "",
 }
 
 

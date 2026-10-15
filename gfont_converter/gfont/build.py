@@ -93,7 +93,7 @@ class ConvertReport:
         if self.empty_in_font:
             L.append(f"Пустые в шрифте: {len(self.empty_in_font)}  {chars(self.empty_in_font)}")
         if self.removed_template:
-            L.append(f"Удалены старые записи шаблона (символ есть в charset, но не в шрифте): "
+            L.append(f"Удалены старые записи шаблона (символ есть в наборе, но нового глифа для него нет): "
                      f"{len(self.removed_template)}  {chars(self.removed_template)}")
         if self.kept_template:
             L.append(f"Оставлены записи шаблона (--preserve-template-extra): "
@@ -257,54 +257,84 @@ def convert(opts: ConvertOptions, log=print) -> ConvertReport:
     shapes: Dict[int, GlyphShape] = {c: by_src[sc] for c, sc in jobs}
     _check(cancel)
 
-    produced: List[int] = []
+    glyphs: Dict[int, list] = {}
     for code, _ in jobs:
         _check(cancel)
         shape = shapes[code]
         rng = np.random.default_rng([opts.seed, code]) if opts.variation > 0 else None
-        strokes = (place_glyph(shape, s, opts.metrics, opts.variation, rng,
-                               lowercase=unicodedata.category(chr(code)) == "Ll",
-                               xheight=fm.xheight,
-                               uppercase=unicodedata.category(chr(code)) == "Lu", cap=fm.cap,
-                               letter=unicodedata.category(chr(code)).startswith("L"))
-                   if not shape.empty else [])
+        glyphs[code] = (place_glyph(shape, s, opts.metrics, opts.variation, rng,
+                                    lowercase=unicodedata.category(chr(code)) == "Ll",
+                                    xheight=fm.xheight,
+                                    uppercase=unicodedata.category(chr(code)) == "Lu",
+                                    cap=fm.cap,
+                                    letter=unicodedata.category(chr(code)).startswith("L"))
+                        if not shape.empty else [])
+
+    produced = write_glyphs(gf, glyphs, rep, scope=codes,
+                            preserve_template_extra=opts.preserve_template_extra,
+                            drop_template_noncjk=opts.drop_template_noncjk)
+    _check(cancel)
+    save_and_validate(gf, opts.output, rep, produced)
+    rep.seconds = time.time() - t0
+    return rep
+
+
+def write_glyphs(gf: GFont, glyphs: Dict[int, list], rep: ConvertReport, *,
+                 scope: Iterable[int], preserve_template_extra: bool = False,
+                 drop_template_noncjk: bool = False, no_new_entries: bool = False) -> List[int]:
+    """Записать готовые штрихи в шаблон и убрать старые записи. Общая часть конвертера
+    и редактора почерка.
+
+    glyphs — код -> штрихи в координатах .gfont (пустые попадают в rep.empty_in_font);
+    scope  — коды «набора»: их старые записи, для которых нет нового глифа, удаляются
+             (если не preserve_template_extra);
+    drop_template_noncjk — удалить и все прочие нетронутые записи шаблона < U+2000.
+    Возвращает список записанных кодов.
+    """
+    produced: List[int] = []
+    for code, strokes in glyphs.items():
         if not any(len(st) >= 2 for st in strokes):
             rep.empty_in_font.append(code)
             continue
         if code in gf:
             rep.replaced.append(code)
+        elif no_new_entries:
+            rep.skipped_new.append(code)
+            continue
         else:
             rep.new.append(code)
         gf.set_glyph(code, strokes)
         produced.append(code)
 
-    # Старые записи шаблона для символов из charset, которых нет в шрифте
-    leftover = [c for c in codes if c in gf and c not in set(produced)]
+    # Старые записи шаблона для символов набора, которых нет среди новых глифов
+    produced_set = set(produced)
+    leftover = [c for c in scope if c in gf and c not in produced_set]
     prefix = set(gf.prefix_codes)
     for c in leftover:
-        if opts.preserve_template_extra or c in prefix:
+        if preserve_template_extra or c in prefix:
             rep.kept_template.append(c)
         else:
             gf.remove(c)
             rep.removed_template.append(c)
 
-    produced_set = set(produced)
+    kept = set(rep.kept_template)
     for c in list(gf.codes()):
-        if c >= NONCJK_LIMIT or c in produced_set or c in prefix or c in rep.kept_template:
+        if c >= NONCJK_LIMIT or c in produced_set or c in prefix or c in kept:
             continue
-        if opts.drop_template_noncjk:
+        if drop_template_noncjk:
             gf.remove(c)
             rep.dropped_noncjk.append(c)
         else:
             rep.untouched_noncjk.append(c)
+    return produced
 
-    _check(cancel)
-    gf.save(opts.output)
+
+def save_and_validate(gf: GFont, output, rep: ConvertReport, produced: List[int]) -> None:
+    """Атомарная запись и самопроверка (обязательны непустые буквы, цифры, знаки)."""
+    gf.save(output)
     rep.total_entries = len(gf.entries)
     required = [c for c in produced if is_core(c)]
-    rep.validation = validate_file(opts.output, required=required, strict_codes=set(produced))
-    rep.seconds = time.time() - t0
-    return rep
+    rep.validation = validate_file(str(output), required=required, strict_codes=set(produced))
 
 
 def save_report_json(rep: ConvertReport, path: str) -> None:

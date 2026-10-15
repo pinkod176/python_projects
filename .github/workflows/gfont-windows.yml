@@ -49,8 +49,13 @@ jobs:
           $p = Start-Process -FilePath $exe -ArgumentList "--smoke-gui", "`"$font`"", "`"$dst\smoke`"" -Wait -PassThru
           Get-Content "$dst\smoke\smoke.txt" -Encoding UTF8
           if ($p.ExitCode -ne 0) { throw "smoke exit $($p.ExitCode)" }
+          $p = Start-Process -FilePath $exe -ArgumentList "--smoke-draw", "`"$dst\рисование`"" -Wait -PassThru
+          Get-Content "$dst\рисование\smoke_draw.txt" -Encoding UTF8
+          if ($p.ExitCode -ne 0) { throw "smoke-draw exit $($p.ExitCode)" }
           New-Item -ItemType Directory -Force ..\ci_out | Out-Null
           Copy-Item "$dst\smoke\*.png" ..\ci_out\
+          New-Item -ItemType Directory -Force ..\ci_out\draw | Out-Null
+          Copy-Item "$dst\рисование\*.png" ..\ci_out\draw\
 
       - name: Обычный запуск окна (платформа windows) и снимок экрана
         shell: pwsh
@@ -96,4 +101,4 @@ jobs:
         working-directory: .
         run: |
           Copy-Item C:\Windows\Fonts\arial.ttf t\
-          docker run --rm -v "${PWD}\t:C:\t" mcr.microsoft.com/windows/servercore:ltsc2022 powershell -NoProfile -Command "if (Get-Command python -ErrorAction SilentlyContinue) { 'PYTHON НАЙДЕН' } else { 'python отсутствует' }; `$p = Start-Process -FilePath C:\t\GfontConverter.exe -ArgumentList '--selftest','C:\t\arial.ttf','C:\t\out' -Wait -PassThru; Get-Content C:\t\out\selftest.txt -Encoding UTF8; `$q = Start-Process -FilePath C:\t\GfontConverter.exe -ArgumentList '--smoke-gui','C:\t\arial.ttf','C:\t\smoke' -Wait -PassThru; Get-Content C:\t\smoke\smoke.txt -Encoding UTF8; 'selftest=' + `$p.ExitCode + ' smoke=' + `$q.ExitCode; exit (`$p.ExitCode + `$q.ExitCode)"
+          docker run --rm -v "${PWD}\t:C:\t" mcr.microsoft.com/windows/servercore:ltsc2022 powershell -NoProfile -Command "if (Get-Command python -ErrorAction SilentlyContinue) { 'PYTHON НАЙДЕН' } else { 'python отсутствует' }; `$p = Start-Process -FilePath C:\t\GfontConverter.exe -ArgumentList '--selftest','C:\t\arial.ttf','C:\t\out' -Wait -PassThru; Get-Content C:\t\out\selftest.txt -Encoding UTF8; `$q = Start-Process -FilePath C:\t\GfontConverter.exe -ArgumentList '--smoke-gui','C:\t\arial.ttf','C:\t\smoke' -Wait -PassThru; Get-Content C:\t\smoke\smoke.txt -Encoding UTF8; `$r = Start-Process -FilePath C:\t\GfontConverter.exe -ArgumentList '--smoke-draw','C:\t\draw' -Wait -PassThru; Get-Content C:\t\draw\smoke_draw.txt -Encoding UTF8; 'selftest=' + `$p.ExitCode + ' smoke=' + `$q.ExitCode + ' draw=' + `$r.ExitCode; exit (`$p.ExitCode + `$q.ExitCode + `$r.ExitCode)"

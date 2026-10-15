@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Dict, List, Optional
 
 from PySide6.QtCore import QPointF, QRectF, QSize, Qt
-from PySide6.QtGui import QBrush, QColor, QPainter, QPainterPath, QPen
+from PySide6.QtGui import QBrush, QColor, QFont, QFontMetricsF, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
 from gfont.normalize import TargetMetrics
@@ -57,6 +57,8 @@ class PreviewWidget(QWidget):
         self.show_guides = True
         self.show_source = False
         self.busy = False
+        self.pale_fallback = False      # вместо красной рамки — бледный символ системного шрифта
+        self.empty_hint = "Откройте шрифт (кнопка «Открыть…» или перетащите .ttf/.otf в окно)"
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setMinimumHeight(160)
         self.setAutoFillBackground(False)
@@ -102,8 +104,9 @@ class PreviewWidget(QWidget):
             for ch in word:
                 r = self.glyphs.get(ch)
                 if r is None or not r.strokes:
-                    items.append((ch, wx, 120.0, None))
-                    wx += 120.0 + GAP
+                    w = self._fallback_width(ch) if self.pale_fallback else 120.0
+                    items.append((ch, wx, w, None))
+                    wx += w + GAP
                     continue
                 xs = [p[0] for s in r.strokes for p in s]
                 x0, x1 = min(xs), max(xs)
@@ -116,6 +119,14 @@ class PreviewWidget(QWidget):
             lines[-1].extend((ch, x + dx, w, r) for ch, dx, w, r in items)
             x += wx + SPACE
         return lines
+
+    def _fallback_font(self) -> QFont:
+        f = QFont(self.font())
+        f.setPixelSize(max(6, int(self.tm.cap_height * 1.3 * self.zoom)))
+        return f
+
+    def _fallback_width(self, ch: str) -> float:
+        return QFontMetricsF(self._fallback_font()).horizontalAdvance(ch) / self.zoom
 
     def sizeHint(self) -> QSize:
         return QSize(900, 300)
@@ -148,6 +159,11 @@ class PreviewWidget(QWidget):
                     p.drawLine(QPointF(0, oy + yy * k), QPointF(self.width(), oy + yy * k))
             for ch, ox, w, r in items:
                 ox_px = ox * k
+                if (r is None or not r.strokes) and self.pale_fallback:
+                    p.setFont(self._fallback_font())
+                    p.setPen(QColor(150, 150, 160, 120))
+                    p.drawText(QPointF(ox_px, oy + tm.baseline * k), ch)
+                    continue
                 if r is None or not r.strokes:
                     p.setPen(QPen(QColor(220, 0, 0), 1.5))
                     p.setBrush(Qt.NoBrush)
@@ -167,6 +183,5 @@ class PreviewWidget(QWidget):
                        "обновление…")
         if not self.text:
             p.setPen(QColor(140, 140, 140))
-            p.drawText(self.rect(), Qt.AlignCenter,
-                       "Откройте шрифт (кнопка «Открыть…» или перетащите .ttf/.otf в окно)")
+            p.drawText(self.rect(), Qt.AlignCenter, self.empty_hint)
         p.end()

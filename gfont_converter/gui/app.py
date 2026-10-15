@@ -77,7 +77,12 @@ def run_app(argv) -> int:
     install_excepthook()
     from .main_window import MainWindow
     _window = MainWindow()
+    if _window.settings["dark_theme"]:
+        from .draw_mode.theme import apply_theme
+        apply_theme(True)
     _window.show()
+    if "--draw" in argv:
+        _window.open_draw_mode()
     # шрифт можно передать аргументом: GfontConverter.exe шрифт.ttf
     files = [a for a in argv[1:] if not a.startswith("-")]
     if files:

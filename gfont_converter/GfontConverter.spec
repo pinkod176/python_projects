@@ -7,7 +7,8 @@ from PyInstaller.utils.hooks import collect_submodules
 hidden = (collect_submodules("fontTools.ttLib.tables")
           + collect_submodules("skimage.morphology")
           + collect_submodules("skimage.measure")
-          + ["scipy.ndimage"])
+          + collect_submodules("gui.draw_mode")
+          + ["scipy.ndimage", "fontTools.pens.qtPen"])
 
 excludes = ["tkinter", "matplotlib", "IPython", "pytest", "PySide6.QtWebEngineCore",
             "PySide6.QtWebEngineWidgets", "PySide6.QtQml", "PySide6.QtQuick",
@@ -21,7 +22,9 @@ a = Analysis(
     pathex=["."],
     datas=[("resources/с_клода_дополненный.gfont", "resources"),
            ("resources/icon.png", "resources"),
-           ("resources/icon.ico", "resources")],
+           ("resources/icon.ico", "resources"),
+           ("resources/sample/DejaVuSans.ttf", "resources/sample"),
+           ("resources/sample/LICENSE-DejaVu.txt", "resources/sample")],
     hiddenimports=hidden + ["convert"],
     excludes=excludes,
     noarchive=False,
