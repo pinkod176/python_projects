@@ -1,0 +1,81 @@
+name: gfont_converter — Android APK
+
+on:
+  push:
+    paths:
+      - "gfont_converter/**"
+      - ".github/workflows/gfont-android.yml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: gfont_converter
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Python 3.10 — та же версия, что внутри APK (Chaquopy); им же собирается байт-код
+      - uses: actions/setup-python@v5
+        id: py
+        with:
+          python-version: "3.10"
+
+      - name: Тесты движка и моста на Python 3.10 (версии библиотек как в APK)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "numpy==1.23.3" "scipy==1.8.1" "scikit-image==0.19.3" "fonttools==4.53.1" pytest
+          python -m pytest -q tests/test_android_api.py tests/test_draw_mode.py tests/test_pipeline.py tests/test_format.py tests/test_validate.py tests/test_stroke_order.py
+
+      - name: Сборка APK (телефон arm64 и эмулятор x86_64)
+        working-directory: gfont_converter/android
+        env:
+          CHAQUOPY_BUILD_PYTHON: ${{ steps.py.outputs.python-path }}
+        run: |
+          ./gradlew --no-daemon assemblePhoneRelease assembleEmuRelease
+          VER=$(python3 -c "import re;print(re.search(r'__version__ = \"(.+)\"', open('../gfont/__init__.py').read()).group(1))")
+          mkdir -p ../dist-apk
+          cp app/build/outputs/apk/phone/release/app-phone-release.apk "../dist-apk/GfontConverter-$VER-android-arm64.apk"
+          cp app/build/outputs/apk/emu/release/app-emu-release.apk ../dist-apk/emulator-x86_64.apk
+          ls -la ../dist-apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GfontConverter-apk
+          path: gfont_converter/dist-apk/GfontConverter-*-android-arm64.apk
+
+      - name: Включить KVM для эмулятора
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Самопроверка на эмуляторе Android 11 (x86_64)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          target: google_apis
+          profile: pixel_5
+          ram-size: 4096M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          working-directory: gfont_converter/android
+          script: ./ci_smoke.sh ../dist-apk/emulator-x86_64.apk ../android-smoke
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-smoke
+          path: gfont_converter/android-smoke/

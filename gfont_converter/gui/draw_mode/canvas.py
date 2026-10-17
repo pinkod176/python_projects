@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import math
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 from PySide6.QtCore import QEvent, QPointF, QRectF, Qt, Signal
@@ -23,9 +23,9 @@ from PySide6.QtGui import QColor, QFont, QMouseEvent, QPainter, QPainterPath, QP
 from PySide6.QtWidgets import QApplication, QSizePolicy, QWidget
 
 from .geometry import CellGeometry
-from .project import DRAWN, EMPTY, GlyphEntry, Project, Stroke
+from .editor import GlyphEditor, processed_cell
+from .project import GlyphEntry, Project, Stroke
 from .render import Colors
-from .strokes import process_stroke
 from .template import TemplateProvider
 
 TEMPLATE_PEN = 2.4               # ширина пунктира шаблона, ед. клетки
@@ -41,8 +41,7 @@ class DrawCanvas(QWidget):
         super().__init__(parent)
         self.provider = provider
         self.project: Optional[Project] = None
-        self.code = ord("а")
-        self.variant = 0
+        self.ed = GlyphEditor()
         self.tool = "draw"                # draw | edit
         self.colors = Colors(False)
         self._scale = 0.6
@@ -55,8 +54,6 @@ class DrawCanvas(QWidget):
         self._space = False
         self._drag: Optional[Tuple[int, int]] = None
         self._proc: Optional[List[np.ndarray]] = None
-        self._undo: Dict[Tuple[int, int], List[GlyphEntry]] = {}
-        self._redo: Dict[Tuple[int, int], List[GlyphEntry]] = {}
         self.setMinimumSize(600, 600)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setFocusPolicy(Qt.StrongFocus)
@@ -65,15 +62,21 @@ class DrawCanvas(QWidget):
         self.setCursor(Qt.CrossCursor)
 
     # ------------------------------------------------------------ данные
+    @property
+    def code(self) -> int:
+        return self.ed.code
+
+    @property
+    def variant(self) -> int:
+        return self.ed.variant
+
     def set_project(self, project: Project) -> None:
         self.project = project
-        self._undo.clear()
-        self._redo.clear()
+        self.ed.set_project(project)
         self.invalidate()
 
     def set_code(self, code: int, variant: int = 0) -> None:
-        self.code = code
-        self.variant = variant
+        self.ed.select(code, variant)
         self._raw = None
         self._drag = None
         self.invalidate()
@@ -86,13 +89,10 @@ class DrawCanvas(QWidget):
         return self.project.geometry() if self.project else CellGeometry()
 
     def entry(self) -> GlyphEntry:
-        return self.project.entry(self.code)
+        return self.ed.entry()
 
     def strokes(self) -> List[Stroke]:
-        e = self.project.glyphs.get(self.code) if self.project else None
-        if e is None or self.variant >= len(e.variants):
-            return []
-        return e.variants[self.variant]
+        return self.ed.strokes() if self.project else []
 
     def invalidate(self) -> None:
         self._proc = None
@@ -101,95 +101,47 @@ class DrawCanvas(QWidget):
     def processed(self) -> List[np.ndarray]:
         """Обработанные штрихи текущего символа в единицах клетки (как будут в файле)."""
         if self._proc is None:
-            geo = self.geo()
-            st = self.project.settings if self.project else None
-            out = []
-            for s in self.strokes():
-                q = process_stroke(s, geo, st.smoothing if st else 0.4, st.density if st else 1.0)
-                out.append(geo.from_g(q) if len(q) else q)
-            self._proc = out
+            self._proc = processed_cell(self.strokes(), self.project) if self.project else []
         return self._proc
 
-    # ------------------------------------------------------------ правка (undo/redo)
-    def _key(self):
-        return (self.code, self.variant)
-
-    def _push_undo(self) -> None:
-        self._undo.setdefault(self._key(), []).append(self.entry().copy())
-        self._redo.pop(self._key(), None)
-        if len(self._undo[self._key()]) > 200:
-            self._undo[self._key()].pop(0)
-
+    # ------------------------------------------------------------ правка (общий GlyphEditor)
     def _changed(self) -> None:
-        e = self.entry()
-        if any(e.variants):
-            if e.status != DRAWN:
-                e.status = DRAWN
-        elif e.status == DRAWN:
-            e.status = EMPTY
-        self.project.dirty = True
         self.invalidate()
         self.strokesChanged.emit(self.code)
 
     def can_undo(self) -> bool:
-        return bool(self._undo.get(self._key()))
+        return self.ed.can_undo()
 
     def can_redo(self) -> bool:
-        return bool(self._redo.get(self._key()))
+        return self.ed.can_redo()
 
     def undo(self) -> None:
-        st = self._undo.get(self._key())
-        if not st:
-            return
-        self._redo.setdefault(self._key(), []).append(self.entry().copy())
-        self.project.glyphs[self.code] = st.pop()
-        self._changed()
+        if self.ed.undo():
+            self._changed()
 
     def redo(self) -> None:
-        st = self._redo.get(self._key())
-        if not st:
-            return
-        self._undo.setdefault(self._key(), []).append(self.entry().copy())
-        self.project.glyphs[self.code] = st.pop()
-        self._changed()
-
-    def _ensure_variant(self) -> List[Stroke]:
-        e = self.entry()
-        while len(e.variants) <= self.variant:
-            e.variants.append([])
-        return e.variants[self.variant]
+        if self.ed.redo():
+            self._changed()
 
     def add_stroke(self, s: Stroke) -> None:
-        self._push_undo()
-        self._ensure_variant().append(s)
-        e = self.entry()
-        if e.source in ("font", "similar", ""):
-            e.source = "user"
+        self.ed.add_stroke(s)
         self._changed()
 
     def delete_last(self) -> None:
-        if not self.strokes():
-            return
-        self._push_undo()
-        self._ensure_variant().pop()
-        self._changed()
+        if self.ed.delete_last():
+            self._changed()
 
     def clear_glyph(self) -> None:
-        if not self.strokes():
-            return
-        self._push_undo()
-        self._ensure_variant().clear()
-        self._changed()
+        if self.ed.clear():
+            self._changed()
 
     def delete_stroke(self, i: int) -> None:
-        self._push_undo()
-        del self._ensure_variant()[i]
-        self._changed()
+        if self.ed.delete_stroke(i):
+            self._changed()
 
     def replace_glyph(self, entry: GlyphEntry) -> None:
         """Заменить символ целиком (заполнение, импорт) с возможностью отмены."""
-        self._push_undo()
-        self.project.glyphs[self.code] = entry
+        self.ed.replace(entry)
         self._changed()
 
     # ------------------------------------------------------------ вид
@@ -462,11 +414,7 @@ class DrawCanvas(QWidget):
             hit = self._nearest_point(pos)
             if hit is not None:
                 i, j = hit
-                self._push_undo()
-                strokes = self._ensure_variant()
-                q = self.processed()[i]
-                strokes[i] = Stroke([(float(x), float(y)) for x, y in q], dot=False, fixed=True)
-                self.entry().source = "user"
+                self.ed.begin_point_edit(i)
                 self._drag = (i, j)
                 self.invalidate()
             return
@@ -485,13 +433,7 @@ class DrawCanvas(QWidget):
             return
         if self._drag is not None:
             i, j = self._drag
-            s = self._ensure_variant()[i]
-            pts = list(s.pts)
-            closed = len(pts) > 3 and pts[0] == pts[-1]
-            pts[j] = self.to_cell(pos)
-            if closed and j in (0, len(pts) - 1):
-                pts[0] = pts[-1] = pts[j]
-            s.pts = pts
+            self.ed.move_point(i, j, *self.to_cell(pos))
             self._proc = None
             self.update()
             return

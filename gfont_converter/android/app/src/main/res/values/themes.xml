@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Gfont" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#3B6FD4</item>
+        <item name="colorSecondary">#E6782A</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

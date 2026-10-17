@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 import threading
 import unicodedata
@@ -40,7 +41,11 @@ DEFAULT_TEMPLATE_NAME = "с_клода_дополненный.gfont"
 
 
 def resource_dir() -> Path:
-    """Папка resources/ рядом с кодом или внутри собранного exe (PyInstaller)."""
+    """Папка resources/ рядом с кодом, внутри собранного exe (PyInstaller) или
+    указанная в GFONT_RESOURCES (Android: файлы распакованы в память приложения)."""
+    env = os.environ.get("GFONT_RESOURCES")
+    if env:
+        return Path(env)
     base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent))
     return base / "resources"
 
