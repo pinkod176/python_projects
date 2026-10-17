@@ -74,6 +74,8 @@ class MainActivity : AppCompatActivity() {
             val r = Engine.callSync("init", filesDir.absolutePath, res.absolutePath)
             Engine.main.post {
                 if (!r.optBoolean("ok")) {
+                    if (intent.getBooleanExtra("smoke", false))
+                        android.util.Log.i("GFONT_SMOKE", "ошибка запуска: ${r.err()}\nGFONT_SMOKE RESULT: FAIL")
                     info("Ошибка запуска", r.err())
                     return@post
                 }

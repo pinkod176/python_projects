@@ -84,8 +84,9 @@ chaquopy {
         version = "3.10"
         System.getenv("CHAQUOPY_BUILD_PYTHON")?.let { buildPython(it) }
         pip {
-            // scikit-image ставится без необязательных зависимостей (matplotlib, imageio …):
-            // движку нужны только skeletonize и find_contours
+            // Пакеты ставятся без зависимостей, список полный: scikit-image без
+            // необязательных matplotlib, imageio, networkx… (движку нужны skeletonize и
+            // find_contours). Тот же набор проверяется тестами в CI.
             options("--no-deps")
             install("numpy==1.23.3")
             install("scipy==1.8.1")
@@ -96,6 +97,9 @@ chaquopy {
             install("chaquopy-libgfortran")
             install("chaquopy-libomp")
             install("fonttools==4.53.1")
+            install("pillow==11.0.0")          // растеризация глифов (gfont/extract.py)
+            install("chaquopy-freetype")
+            install("chaquopy-libjpeg")
         }
     }
     sourceSets {
