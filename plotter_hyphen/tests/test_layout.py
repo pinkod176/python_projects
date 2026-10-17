@@ -56,6 +56,18 @@ def test_punctuation_goes_with_word():
         assert line[0].isalpha() or line[0] in "«(", line
 
 
+def test_standalone_dash_stays_on_previous_line():
+    text = "Программирование плоттера — интересное занятие … и всё"
+    for width in range(10, 60):
+        for hyph in (True, False):
+            r = wrap_text(text, mono, width, hyphenate=hyph)
+            for line in r.lines[1:]:
+                assert line[:1].isalnum(), (width, hyph, r.lines)
+    assert wrap_text("плоттера — интересное", mono, 12).lines == ["плоттера —", "интересное"]
+    # Открывающая кавычка, стоящая отдельно, не приклеивается к предыдущему слову.
+    assert wrap_text("слово « цитата", mono, 6).lines[0] == "слово"
+
+
 def test_off_is_old_behaviour():
     text = "Программирование плоттера — интересное занятие для всех"
     r = wrap_text(text, mono, 20, hyphenate=False)

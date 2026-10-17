@@ -24,6 +24,7 @@ Measure = Callable[[str], float]
 HYPHEN = "-"
 
 _CHUNK_RE = re.compile(r"([^\S\n]*)(\S+)")
+_OPENERS = "«„“\"'([{"
 
 
 @dataclass
@@ -41,11 +42,24 @@ def _letters(s: str) -> int:
     return sum(ch.isalpha() for ch in s)
 
 
+def _chunks(para: str):
+    """Пары (пробелы перед словом, слово). Отдельно стоящие знаки (тире, многоточие и т. п.)
+    приклеиваются к предыдущему слову, чтобы строка не начиналась со знака препинания."""
+    out = []
+    for ws, tok in _CHUNK_RE.findall(para):
+        if out and not any(c.isalnum() for c in tok) and tok[0] not in _OPENERS:
+            pws, ptok = out[-1]
+            out[-1] = (pws, ptok + ws + tok)
+        else:
+            out.append((ws, tok))
+    return out
+
+
 def _wrap_paragraph(para: str, measure: Measure, max_width: float, hyphenate: bool,
                     res: LayoutResult) -> None:
     cur = ""
     first = True
-    for ws, tok in _CHUNK_RE.findall(para):
+    for ws, tok in _chunks(para):
         sep = ws if (cur or first) else ""      # отступ абзаца сохраняется, в начале
         first = False                           # перенесённой строки пробелов нет
         breaks = token_breaks(tok) if hyphenate else []

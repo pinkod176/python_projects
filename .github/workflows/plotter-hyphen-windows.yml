@@ -1,0 +1,81 @@
+name: plotter_hyphen — Windows exe
+
+on:
+  push:
+    paths:
+      - "plotter_hyphen/**"
+      - ".github/workflows/plotter-hyphen-windows.yml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: plotter_hyphen
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Сборка через build_exe.bat (venv, зависимости, тесты, PyInstaller, самопроверка)
+        shell: cmd
+        run: build_exe.bat ci
+
+      - name: Размер exe
+        shell: pwsh
+        run: |
+          $f = Get-Item dist\PlotterHyphen.exe
+          "EXE_SIZE_MB={0:N1}" -f ($f.Length / 1MB)
+
+      - name: Запуск exe без Python (PATH очищен, путь с кириллицей и пробелом)
+        shell: pwsh
+        run: |
+          $dst = Join-Path $env:RUNNER_TEMP "Чистый запуск"
+          New-Item -ItemType Directory -Force $dst | Out-Null
+          Copy-Item dist\PlotterHyphen.exe $dst
+          $env:PATH = "C:\Windows\System32;C:\Windows"
+          Remove-Item Env:PYTHONHOME -ErrorAction SilentlyContinue
+          Remove-Item Env:PYTHONPATH -ErrorAction SilentlyContinue
+          $exe = Join-Path $dst PlotterHyphen.exe
+          $p = Start-Process -FilePath $exe -ArgumentList "--selftest", "`"$dst\selftest`"" -Wait -PassThru
+          Get-Content "$dst\selftest\selftest.txt" -Encoding UTF8
+          if ($p.ExitCode -ne 0) { throw "selftest exit $($p.ExitCode)" }
+          $p = Start-Process -FilePath $exe -ArgumentList "--smoke-gui", "`"$dst\smoke`"" -Wait -PassThru
+          Get-Content "$dst\smoke\smoke.txt" -Encoding UTF8
+          if ($p.ExitCode -ne 0) { throw "smoke exit $($p.ExitCode)" }
+          New-Item -ItemType Directory -Force ..\ci_out | Out-Null
+          Copy-Item "$dst\smoke\*.png" ..\ci_out\
+
+      - name: Обычный запуск окна и снимок экрана
+        shell: pwsh
+        run: |
+          $env:PATH = "C:\Windows\System32;C:\Windows"
+          $p = Start-Process -FilePath dist\PlotterHyphen.exe -PassThru
+          Start-Sleep -Seconds 20
+          if ($p.HasExited) { throw "окно закрылось само, код $($p.ExitCode)" }
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+          $g = [System.Drawing.Graphics]::FromImage($bmp)
+          $g.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+          New-Item -ItemType Directory -Force ..\ci_out | Out-Null
+          $bmp.Save((Join-Path (Resolve-Path ..\ci_out) "windows_desktop.png"))
+          "окно работает, PID $($p.Id)"
+          # exe в один файл = загрузчик + процесс приложения: завершаем всё дерево
+          taskkill /PID $p.Id /T /F
+          Start-Sleep -Seconds 2
+          Get-Process PlotterHyphen -ErrorAction SilentlyContinue | Stop-Process -Force
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PlotterHyphen-exe
+          path: plotter_hyphen/dist/PlotterHyphen.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: ci_out/

@@ -67,3 +67,11 @@ def test_font_without_dash_disables_added_hyphens(app, tmp_path):
 
 def test_default_on():
     assert Settings().hyphenate is True
+
+
+def test_selftest_modes(app, tmp_path):
+    from hyph.selftest import run_selftest, run_smoke_gui
+    assert run_selftest(str(tmp_path / "st")) == 0
+    assert "ИТОГ: OK" in (tmp_path / "st" / "selftest.txt").read_text(encoding="utf-8")
+    assert run_smoke_gui(str(tmp_path / "sm")) == 0
+    assert (tmp_path / "sm" / "window.png").is_file()

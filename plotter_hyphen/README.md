@@ -13,9 +13,24 @@
 
 ## Запуск
 
-Windows: `run_gui.bat`. При первом запуске он создаёт `.venv` и ставит `pyphen` и `PySide6`;
-нужен Python 3.10+.
-Вручную: `pip install -r requirements.txt`, затем `python hyphen_gui.py`.
+**Готовый exe:** `PlotterHyphen.exe` — один файл, Python не нужен. Его собирает GitHub Actions
+(workflow «plotter_hyphen — Windows exe», артефакт `PlotterHyphen-exe`) при каждом изменении
+папки `plotter_hyphen`. Удобно положить exe в папку программы плоттера: шрифт из `gcodeFonts`
+подхватится сам.
+
+**Собрать exe самому** (Windows, Python 3.10+): `build_exe.bat`. Он ставит зависимости
+в `.venv`, прогоняет тесты, собирает `dist\PlotterHyphen.exe` через PyInstaller и проверяет
+собранный exe.
+
+**Из исходников:** `run_gui.bat` (при первом запуске ставит `pyphen` и `PySide6` в `.venv`)
+или `pip install -r requirements.txt` и `python hyphen_gui.py`.
+
+Самопроверки (работают и в exe; результат пишется в файл, потому что у exe нет консоли):
+
+```
+PlotterHyphen.exe --selftest  папка [шрифт.gfont]   -> папка\selftest.txt
+PlotterHyphen.exe --smoke-gui папка                 -> папка\smoke.txt + window.png
+```
 
 ## Как пользоваться
 
@@ -85,5 +100,7 @@ python check_examples.py "C:\...\gcodeFonts\Мой почерк.gfont"   # ши�
 | `hyph/gfont.py` | чтение `.gfont` (формат как в `gfont_converter`) |
 | `hyph/settings.py` | настройки и калибровка (мм на единицу шрифта) |
 | `hyph/gui.py`, `hyphen_gui.py` | окно |
+| `hyph/selftest.py` | самопроверки `--selftest` / `--smoke-gui` для exe |
+| `PlotterHyphen.spec`, `build_exe.bat` | сборка exe (PyInstaller) |
 | `check_examples.py` | проверка на примерах |
 | `tests/` | тесты pytest |
