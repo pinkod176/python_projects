@@ -18,7 +18,8 @@ for i in $(seq 1 240); do
 done
 adb logcat -d > "$OUT/logcat.txt"
 adb exec-out screencap -p > "$OUT/screen_end.png"
-adb pull /sdcard/Android/data/$PKG/files/smoke "$OUT/" >/dev/null 2>&1 || true
+adb exec-out "cd /sdcard/Android/data/$PKG/files && tar cf - smoke" | tar xf - -C "$OUT" || echo "снимки самопроверки не скопировались"
+ls -la "$OUT/smoke" 2>/dev/null
 echo "---- журнал самопроверки ----"
 adb logcat -d -s GFONT_SMOKE:I | sed 's/^.*GFONT_SMOKE: //'
 echo "---- ошибки Python/приложения ----"

@@ -141,15 +141,15 @@ class DrawFragment : Fragment(), DrawCanvasView.Listener {
         root.addView(tvWarn)
 
         val r1 = ctx.hbox()
-        bUndo = ctx.toolButton("↶") { edit("undo") }
-        bRedo = ctx.toolButton("↷") { edit("redo") }
+        bUndo = ctx.toolButton("↶ Отменить") { edit("undo") }
+        bRedo = ctx.toolButton("↷ Повторить") { edit("redo") }
         r1.addView(bUndo)
         r1.addView(bRedo)
         r1.addView(ctx.toolButton("⌫ штрих") { edit("delete_last") })
         r1.addView(ctx.toolButton("Очистить") { edit("clear") })
-        r1.addView(ctx.toolButton("◀") { step(-1) })
+        r1.addView(ctx.toolButton("◀ Назад") { step(-1) })
         r1.addView(ctx.toolButton("Пропустить") { skip() })
-        r1.addView(ctx.toolButton("▶") { step(1) })
+        r1.addView(ctx.toolButton("Дальше ▶") { step(1) })
         root.addView(HorizontalScrollView(ctx).apply { addView(r1); isHorizontalScrollBarEnabled = false },
             lp().apply { topMargin = ctx.dpi(6) })
 
